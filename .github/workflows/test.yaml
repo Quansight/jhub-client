@@ -21,7 +21,7 @@ jobs:
       - name: 'Start JupyterHub'
         working-directory: tests/assets
         run: |
-          docker-compose up --build
+          docker-compose up --build -d
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
