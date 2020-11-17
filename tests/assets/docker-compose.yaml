@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  jupyterhub:
+    build: .
+    volumes:
+      - "./jupyterhub_config.py:/opt/jupyterhub_config.py"
+    ports:
+      - "8000:8000"

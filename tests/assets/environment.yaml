@@ -1,0 +1,6 @@
+name: jupyterhub
+channels:
+  - conda-forge
+dependencies:
+  - jupyterhub
+  - jupyterlab
