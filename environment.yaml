@@ -1,0 +1,8 @@
+name: jupyterhub_client
+channels:
+  - conda-forge
+dependencies:
+  - aiohttp
+  - yarl
+  - pytest
+  - pytest-asyncio
