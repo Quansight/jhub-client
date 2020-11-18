@@ -1,6 +1,6 @@
 import pytest
 
-from jupyterhub_client.simulate import execute_code
+from jupyterhub_client.simulate import execute_code, execute_notebook
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('cells', [
@@ -18,3 +18,12 @@ async def test_execute_code(cells):
     # 4. create websocket connection to jupyterlab kernel
     # 5. send code to jupyterlab kernel and check results match
     await execute_code(hub_url='http://localhost:8000', cells=cells)
+
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('notebook_path', [
+   'tests/assets/notebook/simple.ipynb',
+])
+async def test_execute_notebook(notebook_path):
+    await execute_notebook(hub_url='http://localhost:8000', notebook_path=notebook_path)

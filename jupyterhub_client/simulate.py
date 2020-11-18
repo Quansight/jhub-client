@@ -1,5 +1,6 @@
 import uuid
 import difflib
+import json
 
 from jupyterhub_client.api import JupyterHubAPI, JupyterKernelAPI
 
@@ -24,3 +25,17 @@ async def execute_code(hub_url, cells, username=None, username_format='user-{id}
             await hub.delete_server(username)
         finally:
             await hub.delete_user(username)
+
+
+async def execute_notebook(hub_url, notebook_path, username=None, username_format='user-{id}', timeout=None):
+    with open(notebook_path) as f:
+        notebook_data = json.load(f)
+
+    cells = []
+    for cell in notebook_data['cells']:
+        if cell['cell_type'] == 'code':
+            cells.append((''.join(cell['source']), ''.join(cell['outputs'][0]['data']['text/plain'])))
+
+    print(cells)
+
+    await execute_code(hub_url, cells, username=username, username_format=username_format, timeout=timeout)
