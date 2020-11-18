@@ -36,6 +36,6 @@ jobs:
           JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
       - name: Run command line
         run: |
-          python -m jupyterhub_client run -u user-test -n tests/assets/notebook/simple.ipynb
+          python -m jupyterhub_client run --temporary-user -n tests/assets/notebook/simple.ipynb
         env:
           JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
