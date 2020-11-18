@@ -29,7 +29,7 @@ class JupyterHubAPI:
             if response.status == 200:
                 return await response.json()
             elif response.status == 404:
-                logger.info('username={self.username} does not exist')
+                logger.info(f'username={username} does not exist')
                 return None
 
     async def create_user(self, username):
@@ -54,10 +54,12 @@ class JupyterHubAPI:
             if response.status == 400:
                 raise ValueError(f'server for username={username} is already running')
             elif response.status == 201:
+                logger.info(f'created server for username={username} with user_options={user_options}')
                 return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
 
     async def delete_server(self, username):
         await self.session.delete(self.api_url / 'users' / username / 'server')
+        logger.info(f'deleted server for username={username}')
 
     async def info(self):
         async with self.session.post(self.api_url / 'info') as response:
@@ -88,7 +90,9 @@ class JupyterAPI:
 
     async def create_kernel(self):
         async with self.session.post(self.api_url / 'kernels') as response:
-            return await response.json()
+            data = await response.json()
+            logger.info(f'created kernel={data["id"]} for jupyter')
+            return data
 
     async def list_kernels(self):
         async with self.session.get(self.api_url / 'kernels') as response:
@@ -106,6 +110,7 @@ class JupyterAPI:
             if response.status == 404:
                 raise ValueError(f'failed to delete kernel_id={kernel_id} does not exist')
             elif response.status == 204:
+                logger.info(f'deleted kernel={kernel_id} for jupyter')
                 return True
 
 

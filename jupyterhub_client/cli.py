@@ -21,9 +21,10 @@ def cli(args=None):
 
 def create_run_subcommand(subparser):
     subparser = subparser.add_parser("run")
-    subparser.add_argument("-u", "--username", type=str, help="username to run notebook as", required=True)
     subparser.add_argument("-n", "--notebook", type=str, help="notebook to run", required=True)
     subparser.add_argument("--hub", type=str, default="http://localhost:8000", help="url for running jupyterhub cluster")
+    subparser.add_argument("-u", "--username", type=str, help="username to run notebook as")
+    subparser.add_argument("--temporary-user", action='store_true', default=False, help="create user temporarily if does not exist")
     subparser.set_defaults(func=handle_run)
 
 
@@ -31,8 +32,12 @@ def handle_run(args):
     from jupyterhub_client.execute import execute_notebook
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(
-        execute_notebook(
-            hub_url=args.hub,
-            notebook_path=args.notebook,
-            username=args.username))
+    kwargs = {
+        'hub_url': args.hub,
+        'notebook_path': args.notebook,
+        'username': args.username,
+        'create_user': args.temporary_user,
+        'delete_user': args.temporary_user
+    }
+
+    loop.run_until_complete(execute_notebook(**kwargs))

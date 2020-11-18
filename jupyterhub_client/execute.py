@@ -1,17 +1,24 @@
 import uuid
 import difflib
+import logging
 
 from jupyterhub_client.api import JupyterHubAPI, JupyterKernelAPI
 from jupyterhub_client.utils import parse_notebook_cells
 
+logger = logging.getLogger(__name__)
 
-async def execute_code(hub_url, cells, username=None, username_format='user-{id}', timeout=None):
+
+async def execute_code(hub_url, cells, username=None, create_user=False, delete_user=False, username_format='user-{id}', timeout=None):
     username = username or username_format.format(id=str(uuid.uuid4()))
     hub = JupyterHubAPI(hub_url)
 
     async with hub:
         try:
-            await hub.create_user(username)
+            if (await hub.get_user(username)) is None:
+                if create_user:
+                    await hub.create_user(username)
+                else:
+                    raise ValueError(f'current username={username} does not exist and create_user={create_user}')
             jupyter = await hub.create_server(username)
             async with jupyter:
                 kernel_id = (await jupyter.create_kernel())['id']
@@ -24,9 +31,10 @@ async def execute_code(hub_url, cells, username=None, username_format='user-{id}
                 await jupyter.delete_kernel(kernel_id)
             await hub.delete_server(username)
         finally:
-            await hub.delete_user(username)
+            if delete_user:
+                await hub.delete_user(username)
 
 
-async def execute_notebook(hub_url, notebook_path, username=None, username_format='user-{id}', timeout=None):
+async def execute_notebook(hub_url, notebook_path, **kwargs):
     cells = parse_notebook_cells(notebook_path)
-    await execute_code(hub_url, cells, username=username, username_format=username_format, timeout=timeout)
+    await execute_code(hub_url, cells, **kwargs)

@@ -18,7 +18,7 @@ async def test_execute_code(cells):
     # 3. create jupyterlab kernel
     # 4. create websocket connection to jupyterlab kernel
     # 5. send code to jupyterlab kernel and check results match
-    await execute_code(hub_url='http://localhost:8000', cells=cells)
+    await execute_code(hub_url='http://localhost:8000', cells=cells, create_user=True, delete_user=True)
 
 
 
@@ -27,4 +27,4 @@ async def test_execute_code(cells):
    'tests/assets/notebook/simple.ipynb',
 ])
 async def test_execute_notebook(notebook_path):
-    await execute_notebook(hub_url='http://localhost:8000', notebook_path=notebook_path)
+    await execute_notebook(hub_url='http://localhost:8000', notebook_path=notebook_path, create_user=True, delete_user=True)
