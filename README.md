@@ -2,6 +2,14 @@
 
 Automation of JupyterHub via python client.
 
+# CLI
+
+## Run notebook as given user
+
+```shell
+python -m jupyterhub_client run --username <username> --notebook <notebook> --hub http://localhost:8000
+```
+
 # Testing
 
 Bring up test jupyterhub cluster
