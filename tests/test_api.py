@@ -32,12 +32,14 @@ async def test_hub_server(hub):
     username = f'test-{uuid.uuid4()}'
 
     async with hub:
-        await hub.create_user(username)
-        jupyter = await hub.create_server(username)
-        async with jupyter:
-            await jupyter.list_kernels()
-        await hub.delete_server(username)
-        await hub.delete_user(username)
+        try:
+            await hub.create_user(username)
+            jupyter = await hub.create_server(username)
+            async with jupyter:
+                await jupyter.list_kernels()
+            await hub.delete_server(username)
+        finally:
+            await hub.delete_user(username)
 
 
 @pytest.mark.asyncio
@@ -46,18 +48,20 @@ async def test_hub_kernel(hub):
     username = f'test-{uuid.uuid4()}'
 
     async with hub:
-        await hub.create_user(username)
-        async with (await hub.create_server(username)) as jupyter:
-            kernel_id = (await jupyter.create_kernel())['id']
-            async with JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token) as kernel:
-                assert await kernel.send_code(username, '''
-a = 10
-1 + 2
-''') == '3'
-                # prove that kernel is stateful
-                assert await kernel.send_code(username, '''
-a
-''') == '10'
-            await jupyter.delete_kernel(kernel_id)
-        await hub.delete_server(username)
-        await hub.delete_user(username)
+        try:
+            await hub.create_user(username)
+            async with (await hub.create_server(username)) as jupyter:
+                kernel_id = (await jupyter.create_kernel())['id']
+                async with JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token) as kernel:
+                    assert await kernel.send_code(username, '''
+    a = 10
+    1 + 2
+    ''') == '3'
+                    # prove that kernel is stateful
+                    assert await kernel.send_code(username, '''
+    a
+    ''') == '10'
+                await jupyter.delete_kernel(kernel_id)
+            await hub.delete_server(username)
+        finally:
+            await hub.delete_user(username)

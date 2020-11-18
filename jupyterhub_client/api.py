@@ -1,5 +1,7 @@
+import os
 import uuid
 import logging
+import time
 
 import yarl
 import aiohttp
@@ -8,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class JupyterHubAPI:
-    def __init__(self, hub_url, api_token):
+    def __init__(self, hub_url, api_token=None):
         self.hub_url = yarl.URL(hub_url)
         self.api_url = self.hub_url / 'hub/api'
-        self.api_token = api_token
+        self.api_token = api_token or os.environ['JUPYTERHUB_API_TOKEN']
 
     async def __aenter__(self):
         self.session = aiohttp.ClientSession(headers={
@@ -73,7 +75,7 @@ class JupyterHubAPI:
 class JupyterAPI:
     def __init__(self, notebook_url, api_token):
         self.api_url = yarl.URL(notebook_url) / 'api'
-        self.api_token = api_token
+        self.api_token = api_token or os.environ['JUPYTERHUB_API_TOKEN']
 
     async def __aenter__(self):
         self.session = aiohttp.ClientSession(headers={
@@ -110,7 +112,7 @@ class JupyterAPI:
 class JupyterKernelAPI:
     def __init__(self, kernel_url, api_token):
         self.api_url = kernel_url
-        self.api_token = api_token
+        self.api_token = api_token or os.environ['JUPYTERHUB_API_TOKEN']
 
     async def __aenter__(self):
         self.session = aiohttp.ClientSession(headers={
@@ -144,12 +146,16 @@ class JupyterKernelAPI:
             "channel": "shell"
         }
 
-    async def send_code(self, username, code):
+    async def send_code(self, username, code, timeout=None):
         msg_id = str(uuid.uuid4())
+        start_time = time.time()
+
         await self.websocket.send_json(self.request_execute_code(msg_id, username, code))
         async for msg_text in self.websocket:
             if msg_text.type != aiohttp.WSMsgType.TEXT:
                 return False
+
+            # TODO: timeout is ignored
 
             msg = msg_text.json()
 
