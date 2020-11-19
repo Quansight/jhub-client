@@ -4,18 +4,19 @@ import asyncio
 
 
 def cli(args=None):
-    logging.basicConfig(level=logging.INFO)
-
     parser = argparse.ArgumentParser(description="jupyterhub client cli")
     subparser = parser.add_subparsers(help="jupyterhub client cli")
     create_run_subcommand(subparser)
     parser.set_defaults(func=None)
+    parser.add_argument("--verbose", action="store_true", help="turn on jupyterhub_client debugging")
     args = parser.parse_args(args)
 
     if args.func is None:
         parser.print_help(sys.stderr)
         sys.exit(1)
 
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(level=logging_level)
     args.func(args)
 
 

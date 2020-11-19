@@ -25,8 +25,11 @@ async def execute_code(hub_url, cells, username=None, create_user=False, delete_
                 async with JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token) as kernel:
                     for i, (code, expected_result) in enumerate(cells):
                         kernel_result = await kernel.send_code(username, code, timeout=timeout)
+                        logger.debug(f'kernel execucting cell={i} code=\n{code}')
+                        logger.debug(f'kernel result cell={i} result\n{kernel_result}')
                         if kernel_result != expected_result:
                             diff = ''.join(difflib.unified_diff(kernel_result, expected_result))
+                            logger.error(f'kernel result did not match expected result diff={diff}')
                             raise ValueError(f'execution of cell={i} code={code} did not match expected result diff={diff}')
                 await jupyter.delete_kernel(kernel_id)
             await hub.delete_server(username)
