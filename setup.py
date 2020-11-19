@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='jupyterhub, jupyter',
-    packages=find_packages('jupyterhub_client'),
+    packages=find_packages(where='.'),
     install_requires=['aiohttp', 'yarl'],
     extras_require={
         'dev': ['pytest', 'pytest-asyncio'],
