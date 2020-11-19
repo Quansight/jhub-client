@@ -8,6 +8,9 @@ on:
     branches:
       - master
 
+env:
+  JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
+
 jobs:
   test-general:
     name: 'Test Package'
@@ -28,14 +31,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install .[dev]
       - name: Run tests
         run: |
           pytest -v
-        env:
-          JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
       - name: Run command line
         run: |
-          python -m jupyterhub_client --verbose run --temporary-user -n tests/assets/notebook/simple.ipynb
-        env:
-          JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
+          jhubctl --verbose run --temporary-user -n tests/assets/notebook/simple.ipynb

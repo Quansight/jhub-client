@@ -1,4 +1,0 @@
-aiohttp
-yarl
-pytest
-pytest-asyncio

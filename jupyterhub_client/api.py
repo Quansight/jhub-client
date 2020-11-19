@@ -167,11 +167,10 @@ class JupyterKernelAPI:
             if 'parent_header' in msg and msg['parent_header'].get('msg_id') == msg_id:
                 # These are responses to our request
                 if msg['channel'] == 'iopub':
-                    response = None
                     if msg['msg_type'] == 'execute_result':
-                        response = msg['content']['data']['text/plain']
+                        return msg['content']['data']['text/plain']
                     elif msg['msg_type'] == 'stream':
-                        response = msg['content']['text']
-
-                    if response:
-                        return response
+                        return msg['content']['text']
+                    # cell did not produce output
+                    elif msg['content'].get('execution_state') == 'idle':
+                        return ''

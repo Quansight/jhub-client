@@ -8,7 +8,7 @@ def cli(args=None):
     subparser = parser.add_subparsers(help="jupyterhub client cli")
     create_run_subcommand(subparser)
     parser.set_defaults(func=None)
-    parser.add_argument("--verbose", action="store_true", help="turn on jupyterhub_client debugging")
+    parser.add_argument("-v", "--verbose", action="store_true", help="turn on jupyterhub_client debugging")
     args = parser.parse_args(args)
 
     if args.func is None:
