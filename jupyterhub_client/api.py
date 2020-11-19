@@ -55,7 +55,7 @@ class JupyterHubAPI:
                 raise ValueError(f'server for username={username} is already running')
             elif response.status == 201:
                 logger.info(f'created server for username={username} with user_options={user_options}')
-                return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
+                return True
 
     async def delete_server(self, username):
         await self.session.delete(self.api_url / 'users' / username / 'server')

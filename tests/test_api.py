@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from jupyterhub_client.api import JupyterKernelAPI
+from jupyterhub_client.api import JupyterKernelAPI, JupyterAPI
 
 
 @pytest.mark.asyncio
@@ -34,7 +34,8 @@ async def test_hub_server(hub):
     async with hub:
         try:
             await hub.create_user(username)
-            jupyter = await hub.create_server(username)
+            await hub.create_server(username)
+            jupyter = JupyterAPI(hub.hub_url / 'user' / username, hub.api_token)
             async with jupyter:
                 await jupyter.list_kernels()
             await hub.delete_server(username)
@@ -50,9 +51,12 @@ async def test_hub_kernel(hub):
     async with hub:
         try:
             await hub.create_user(username)
-            async with (await hub.create_server(username)) as jupyter:
+            await hub.create_server(username)
+            jupyter = JupyterAPI(hub.hub_url / 'user' / username, hub.api_token)
+            async with jupyter:
                 kernel_id = (await jupyter.create_kernel())['id']
-                async with JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token) as kernel:
+                kernel = JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token)
+                async with kernel:
                     assert await kernel.send_code(username, '''
     a = 10
     1 + 2

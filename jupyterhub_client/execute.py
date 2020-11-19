@@ -3,7 +3,7 @@ import difflib
 import logging
 import textwrap
 
-from jupyterhub_client.api import JupyterHubAPI, JupyterKernelAPI
+from jupyterhub_client.api import JupyterHubAPI, JupyterKernelAPI, JupyterAPI
 from jupyterhub_client.utils import parse_notebook_cells
 
 logger = logging.getLogger(__name__)
@@ -15,15 +15,23 @@ async def execute_code(hub_url, cells, username=None, create_user=False, delete_
 
     async with hub:
         try:
-            if (await hub.get_user(username)) is None:
+            user = await hub.get_user(username)
+            if user is None:
                 if create_user:
                     await hub.create_user(username)
                 else:
                     raise ValueError(f'current username={username} does not exist and create_user={create_user}')
-            jupyter = await hub.create_server(username)
+                user = await hub.get_user(username)
+
+            if user['server'] is None:
+                await hub.create_server(username)
+
+            jupyter = JupyterAPI(hub.hub_url / 'user' / username, hub.api_token)
+
             async with jupyter:
                 kernel_id = (await jupyter.create_kernel())['id']
-                async with JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token) as kernel:
+                kernel = JupyterKernelAPI(jupyter.api_url / 'kernels' / kernel_id, jupyter.api_token)
+                async with kernel:
                     for i, (code, expected_result) in enumerate(cells):
                         kernel_result = await kernel.send_code(username, code, timeout=timeout)
                         logger.debug(f'kernel execucting cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
