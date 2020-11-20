@@ -72,3 +72,36 @@ Run unit tests
 ```shell
 pytest
 ```
+
+# FAQ
+
+## Creating an API Token
+
+Login to the given jupyterhub cluster
+
+![qhub login](./images/login.png)
+
+Access the hub control page. The url will be `<hub_url>/hub/home`.
+
+![qhub home](./images/home.png)
+
+Click on `Token` in top left corner and request new api token. This
+token will have the permissions of the user. Make sure to set the
+environment variable `JUPYTERLAB_API_TOKEN` to the value of the given
+token.
+
+![qhub token](./images/token.png)
+
+If you want to add a service token instead edit the jupyterhub
+configuration.
+
+```python
+c.JupyterHub.services = [
+ {
+        'name': '<my-service-name>',
+        'api_token': '<my-super-secret-long-token>',
+        'oauth_no_confirm': True,
+        'admin': True
+    }
+]
+```
