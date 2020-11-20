@@ -23,7 +23,9 @@ async def execute_code(hub_url, cells, username=None, create_user=False, delete_
                 async with kernel:
                     for i, (code, expected_result) in enumerate(cells):
                         kernel_result = await kernel.send_code(username, code, timeout=timeout, wait=(not daemonized))
-                        if not daemonized:
+                        if daemonized:
+                            logger.debug(f'kernel submitted cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
+                        else:
                             logger.debug(f'kernel execucting cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
                             logger.debug(f'kernel result cell={i} result=\n{textwrap.indent(kernel_result, "   | ")}')
                             if validate and kernel_result != expected_result:
