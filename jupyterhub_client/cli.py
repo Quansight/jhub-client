@@ -30,6 +30,7 @@ def create_run_subcommand(subparser):
     subparser.add_argument("-u", "--username", type=str, help="username to run notebook as")
     subparser.add_argument("--temporary-user", action='store_true', default=False, help="create user temporarily if does not exist")
     subparser.add_argument('-d', '--daemonize', action='store_true', default=False, help='run notebook asyncronously')
+    subparser.add_argument('--stop-server', action='store_true', default=False, help='stop server after completion of notebook')
     subparser.add_argument('--validate', action='store_true', default=False, help='validate notebook output matches')
     subparser.set_defaults(func=handle_run)
 
@@ -45,7 +46,8 @@ def handle_run(args):
         'create_user': args.temporary_user,
         'delete_user': args.temporary_user,
         'validate': args.validate,
-        'daemonized': args.daemonize
+        'daemonized': args.daemonize,
+        'stop_server': args.stop_server
     }
 
     if args.daemonize and args.temporary_user:
