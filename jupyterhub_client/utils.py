@@ -19,3 +19,34 @@ def parse_notebook_cells(notebook_path):
             cells.append((source, result))
 
     return cells
+
+
+TEMPLATE_SCRIPT_HEADER = '''
+import os
+import sys
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('jupyterhub_client')
+
+OUTPUT_FORMAT = '{output_format}'
+STDOUT_FILENAME = os.path.expanduser('{stdout_filename}')
+STDERR_FILENAME = os.path.expanduser('{stderr_filename}')
+
+if OUTPUT_FORMAT == 'file':
+    logger.info('writting output to files stdout={stdout_filename} and stderr={stderr_filename}')
+    sys.stdout = open(STDOUT_FILENAME, 'w')
+    sys.stderr = open(STDERR_FILENAME, 'w')
+
+'''
+
+
+def tangle_cells(cells, output_format='file', stdout_filename=None, stderr_filename=None):
+    # TODO: eventually support writing output to notebook
+
+    tangled_code = []
+    for i, (code, expected_result) in enumerate(cells):
+        tangled_code.append('logger.info("beginning execution cell={i}")')
+        tangled_code.append(code)
+        tangled_code.append('logger.info("completed execution cell={i}")')
+    return TEMPLATE_SCRIPT_HEADER + '\n'.join(tangled_code)

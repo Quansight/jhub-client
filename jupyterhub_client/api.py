@@ -24,6 +24,16 @@ class JupyterHubAPI:
     async def __aexit__(self, exc_type, exc, tb):
         await self.session.close()
 
+    async def ensure_user(self, username, create_user=False):
+        user = await self.get_user(username)
+        if user is None:
+            if create_user:
+                await self.create_user(username)
+            else:
+                raise ValueError(f'current username={username} does not exist and create_user={create_user}')
+            user = await self.get_user(username)
+        return user
+
     async def get_user(self, username):
         async with self.session.get(self.api_url / 'users' / username) as response:
             if response.status == 200:
@@ -47,6 +57,12 @@ class JupyterHubAPI:
                 logger.info(f'deleted username={username}')
             elif response.status == 404:
                 raise ValueError(f'username={username} does not exist cannot delete')
+
+    async def ensure_server(self, username, user_options=None, create_user=False):
+        user = await self.ensure_user(username, create_user=create_user)
+        if user['server'] is None:
+            await self.create_server(username)
+        return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
@@ -97,6 +113,10 @@ class JupyterAPI:
     async def list_kernels(self):
         async with self.session.get(self.api_url / 'kernels') as response:
             return await response.json()
+
+    async def ensure_kernel(self):
+        kernel_id = (await self.create_kernel())['id']
+        return kernel_id, JupyterKernelAPI(self.api_url / 'kernels' / kernel_id, self.api_token)
 
     async def get_kernel(self, kernel_id):
         async with self.session.get(self.api_url / 'kernels' / kernel_id) as response:
@@ -151,11 +171,15 @@ class JupyterKernelAPI:
             "channel": "shell"
         }
 
-    async def send_code(self, username, code, timeout=None):
+    async def send_code(self, username, code, wait=True, timeout=None):
         msg_id = str(uuid.uuid4())
         start_time = time.time()
 
         await self.websocket.send_json(self.request_execute_code(msg_id, username, code))
+
+        if not wait:
+            return None
+
         async for msg_text in self.websocket:
             if msg_text.type != aiohttp.WSMsgType.TEXT:
                 return False

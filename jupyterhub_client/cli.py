@@ -1,6 +1,9 @@
 import argparse
 import logging
 import asyncio
+import sys
+
+logger = logging.getLogger(__name__)
 
 
 def cli(args=None):
@@ -26,6 +29,8 @@ def create_run_subcommand(subparser):
     subparser.add_argument("--hub", type=str, default="http://localhost:8000", help="url for running jupyterhub cluster")
     subparser.add_argument("-u", "--username", type=str, help="username to run notebook as")
     subparser.add_argument("--temporary-user", action='store_true', default=False, help="create user temporarily if does not exist")
+    subparser.add_argument('-d', '--daemonize', action='store_true', default=False, help='run notebook asyncronously')
+    subparser.add_argument('--validate', action='store_true', default=False, help='validate notebook output matches')
     subparser.set_defaults(func=handle_run)
 
 
@@ -38,7 +43,16 @@ def handle_run(args):
         'notebook_path': args.notebook,
         'username': args.username,
         'create_user': args.temporary_user,
-        'delete_user': args.temporary_user
+        'delete_user': args.temporary_user,
+        'validate': args.validate,
+        'daemonized': args.daemonize
     }
+
+    if args.daemonize and args.temporary_user:
+        logger.warning('running notebook in daemonized mode will not delete temporary user')
+
+    if args.daemonize and args.validate:
+        logger.error('running notebook in daemonized mode does not support validation')
+        sys.exit(1)
 
     loop.run_until_complete(execute_notebook(**kwargs))
