@@ -4,15 +4,40 @@ Automation of JupyterHub
 
 # Command Line Usage
 
-## Run notebook as given user
+Bellow are some example use cases of the tool
 
-You can run a given notebook as a pre-existing user. The api token
-either has to be for the given user or an admin token.
+## Run notebook as given user syncronously
+
+You can run a given notebook as a pre-existing user syncronously. The
+api token either has to be for the given user or an admin token.
 
 ```shell
 export JUPYTERHUB_API_TOKEN=<api-token>
-python -m jupyterhub_client run --username <username> --notebook <notebook> --hub <hub_url>
+jhubctl --verbose run --username <username> --notebook <notebook> --hub <hub_url>
 ```
+
+## Run notebook as given user syncronously and validate notebook output matches
+
+You can run a given notebook as a pre-existing user syncronously. The
+api token either has to be for the given user or an admin token.
+
+```shell
+export JUPYTERHUB_API_TOKEN=<api-token>
+jhubctl run --username <username> --notebook <notebook> --hub <hub_url> --validate
+```
+
+## Run notebook asyncronously and shutdown server after completion
+
+You can run a given notebook as a pre-existing user asyncronously and
+stop server after completion. The api token either has to be for the
+given user or an admin token.
+
+```shell
+export JUPYTERHUB_API_TOKEN=<api-token>
+jhubctl run --username <username> --notebook <notebook> --hub <hub_url> --daemonize --stop-server
+```
+
+## Run a given notebook as a temporary user
 
 Additionally you can temporarily create a user `user-<uuid>` or supply
 the temporary user's username. The username will be deleted upon
