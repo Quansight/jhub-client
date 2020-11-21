@@ -9,38 +9,63 @@ api token you can impersonate users and create temporary
 users. Service api tokens do not have an associated user therefore
 must run as existing users or temporary users.
 
-## Run notebook as given token user syncronously
+Set the api token used for `jhubctl`.
+
+```shell
+export JUPYTERHUB_API_TOKEN=<api-token>
+```
+
+## Run
+
+```shell
+usage: __main__.py run [-h] -n NOTEBOOK [--hub HUB] [-u USERNAME]
+                       [--user-options USER_OPTIONS] [--temporary-user] [-d]
+                       [--stop-server] [--validate]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n NOTEBOOK, --notebook NOTEBOOK
+                        notebook to run
+  --hub HUB             url for running jupyterhub cluster
+  -u USERNAME, --username USERNAME
+                        username to run notebook as
+  --user-options USER_OPTIONS
+                        json object representing user server options
+  --temporary-user      create user temporarily if does not exist
+  -d, --daemonize       run notebook asyncronously
+  --stop-server         stop server after completion of notebook
+  --validate            validate notebook output matches
+```
+
+### Run notebook as given token user syncronously
 
 You can run a given notebook as a pre-existing user syncronously. The
 api token either has to be for the given user or an admin token.
 
 ```shell
-export JUPYTERHUB_API_TOKEN=<api-token>
 jhubctl --verbose run --notebook <notebook> --hub <hub_url>
 ```
 
-## Run notebook as given token user syncronously and validate notebook output matches
+### Run notebook as given token user syncronously and validate notebook output matches
 
 You can run a given notebook as a pre-existing user syncronously. The
 api token either has to be for the given user or an admin token.
 
 ```shell
-export JUPYTERHUB_API_TOKEN=<api-token>
 jhubctl run --notebook <notebook> --hub <hub_url> --validate
 ```
 
-## Run notebook as given token user asyncronously and shutdown server after completion
+### Run notebook as given token user asyncronously and shutdown server after completion
 
 You can run a given notebook as a pre-existing user asyncronously and
 stop server after completion. The api token either has to be for the
 given user or an admin token.
 
 ```shell
-export JUPYTERHUB_API_TOKEN=<api-token>
 jhubctl run --notebook <notebook> --hub <hub_url> --daemonize --stop-server
 ```
 
-## Run notebook as given token user with user options
+### Run notebook as given token user with user options
 
 While this is an advanced user case, it is often times encountered
 with kubernetes jupyerhub clusters where you may want to select a
@@ -51,18 +76,16 @@ possible for other more customized jupyterhub clusters that different
 options must be used.
 
 ```shell
-export JUPYTERHUB_API_TOKEN=<api-token>
 jhubctl run --notebook <notebook> --hub <hub_url> --user-options='{"profile": 1}'
 ```
 
-## Run a given notebook as a temporary user
+### Run a given notebook as a temporary user
 
 Additionally you can temporarily create a user `user-<uuid>` or supply
 the temporary user's username. The username will be deleted upon
 completion. The api token requires admin permissions.
 
 ```shell
-export JUPYTERHUB_API_TOKEN=<api-token>
 jhubctl run --temporary-user --notebook <notebook> --hub <hub_url> [--username <username>]
 ```
 
