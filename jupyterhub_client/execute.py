@@ -42,7 +42,7 @@ async def determine_username(hub, username=None, user_format='user-{user}-{id}',
         return username
 
 
-async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, timeout=None, daemonized=False, validate=False, stop_server=True, user_options=None):
+async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, timeout=None, daemonized=False, validate=False, stop_server=True, user_options=None, kernel_spec=None):
     hub = JupyterHubAPI(hub_url)
 
     async with hub:
@@ -51,7 +51,7 @@ async def execute_code(hub_url, cells, username=None, temporary_user=False, crea
             jupyter = await hub.ensure_server(username, create_user=create_user, user_options=user_options)
 
             async with jupyter:
-                kernel_id, kernel = await jupyter.ensure_kernel()
+                kernel_id, kernel = await jupyter.ensure_kernel(kernel_spec=kernel_spec)
                 async with kernel:
                     if daemonized and stop_server:
                         await kernel.send_code(username, DAEMONIZED_STOP_SERVER_HEADER.format(

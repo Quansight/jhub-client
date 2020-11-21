@@ -34,6 +34,7 @@ def create_run_subcommand(subparser):
     subparser.add_argument('-d', '--daemonize', action='store_true', default=False, help='run notebook asyncronously')
     subparser.add_argument('--stop-server', action='store_true', default=False, help='stop server after completion of notebook')
     subparser.add_argument('--validate', action='store_true', default=False, help='validate notebook output matches')
+    subparser.add_argument('--kernel-spec', type=str, help='kernel spec to launch is not specified will use default')
     subparser.set_defaults(func=handle_run)
 
 
@@ -59,6 +60,7 @@ def handle_run(args):
         'daemonized': args.daemonize,
         'stop_server': args.stop_server,
         'user_options': args.user_options,
+        'kernel_spec': args.kernel_spec,
     }
 
     if args.daemonize and args.temporary_user:

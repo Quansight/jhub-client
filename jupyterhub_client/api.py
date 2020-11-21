@@ -108,18 +108,33 @@ class JupyterAPI:
     async def __aexit__(self, exc_type, exc, tb):
         await self.session.close()
 
-    async def create_kernel(self):
-        async with self.session.post(self.api_url / 'kernels') as response:
+    async def create_kernel(self, kernel_spec=None):
+        data = {'kernel_spec': kernel_spec} if kernel_spec else None
+
+        async with self.session.post(self.api_url / 'kernels', json=data) as response:
             data = await response.json()
-            logger.info(f'created kernel={data["id"]} for jupyter')
+            print('asdf', data)
+            logger.info(f'created kernel_spec={kernel_spec} kernel={data["id"]} for jupyter')
             return data
+
+    async def list_kernel_specs(self):
+        async with self.session.get(self.api_url / 'kernelspecs') as response:
+            return await response.json()
 
     async def list_kernels(self):
         async with self.session.get(self.api_url / 'kernels') as response:
             return await response.json()
 
-    async def ensure_kernel(self):
-        kernel_id = (await self.create_kernel())['id']
+    async def ensure_kernel(self, kernel_spec=None):
+        kernel_specs = await self.list_kernel_specs()
+        if kernel_spec is None:
+            kernel_spec = kernel_specs['default']
+        else:
+            if kernel_spec not in kernel_specs['kernelspecs']:
+                logger.error(f'kernel_spec={kernel_spec} not listed in available kernel specifications')
+                raise ValueError(f'kernel_spec={kernel_spec} not listed in available kernel specifications')
+
+        kernel_id = (await self.create_kernel(kernel_spec=kernel_spec))['id']
         return kernel_id, JupyterKernelAPI(self.api_url / 'kernels' / kernel_id, self.api_token)
 
     async def get_kernel(self, kernel_id):
