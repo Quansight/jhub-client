@@ -40,6 +40,21 @@ export JUPYTERHUB_API_TOKEN=<api-token>
 jhubctl run --notebook <notebook> --hub <hub_url> --daemonize --stop-server
 ```
 
+## Run notebook as given token user with user options
+
+While this is an advanced user case, it is often times encountered
+with kubernetes jupyerhub clusters where you may want to select a
+given profile e.g. small, medium, gpu jupyterlab session. For these
+clusters you must supply `--user-options='{"profile": 0}'` where 0 is
+replaced with the index of the profile you would like to choose. It is
+possible for other more customized jupyterhub clusters that different
+options must be used.
+
+```shell
+export JUPYTERHUB_API_TOKEN=<api-token>
+jhubctl run --notebook <notebook> --hub <hub_url> --user-options='{"profile": 1}'
+```
+
 ## Run a given notebook as a temporary user
 
 Additionally you can temporarily create a user `user-<uuid>` or supply
