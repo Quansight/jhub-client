@@ -43,6 +43,7 @@ def handle_run(args):
         'hub_url': args.hub,
         'notebook_path': args.notebook,
         'username': args.username,
+        'temporary_user': args.temporary_user,
         'create_user': args.temporary_user,
         'delete_user': args.temporary_user,
         'validate': args.validate,

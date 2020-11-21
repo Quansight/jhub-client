@@ -89,6 +89,10 @@ class JupyterHubAPI:
         async with self.session.get(self.api_url / 'proxy') as response:
             return await response.json()
 
+    async def identify_token(self, token):
+        async with self.session.get(self.api_url / 'authorizations' / 'token' / token) as response:
+            return await response.json()
+
 
 class JupyterAPI:
     def __init__(self, notebook_url, api_token):

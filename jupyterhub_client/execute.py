@@ -3,6 +3,7 @@ import difflib
 import logging
 import textwrap
 import datetime
+import sys
 
 from jupyterhub_client.api import JupyterHubAPI, JupyterKernelAPI, JupyterAPI
 from jupyterhub_client.utils import parse_notebook_cells, tangle_cells
@@ -24,11 +25,28 @@ get_ipython().set_custom_exc((Exception,), custom_exc)
 '''
 
 
-async def execute_code(hub_url, cells, username=None, create_user=False, delete_user=False, username_format='user-{id}', timeout=None, daemonized=False, validate=False, stop_server=True):
-    username = username or username_format.format(id=str(uuid.uuid4()))
+async def determine_username(hub, username=None, user_format='user-{user}-{id}', service_format='service-{name}-{id}', temporary_user=False):
+    token = await hub.identify_token(hub.api_token)
+
+    if username is None and not temporary_user:
+        if token['kind'] == 'service':
+            logger.error('cannot execute without specified username or temporary_user=True for service api token')
+            sys.exit(1)
+        return token['name']
+    elif username is None and temporary_user:
+        if token['kind'] == 'service':
+            return service_format.format(id=str(uuid.uuid4()), name=token['name'])
+        else:
+            return user_format.format(id=str(uuid.uuid4()), name=token['name'])
+    else:
+        return username
+
+
+async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, username_format='user-{user}-{id}', service_format='service-{name}-{id}', timeout=None, daemonized=False, validate=False, stop_server=True):
     hub = JupyterHubAPI(hub_url)
 
     async with hub:
+        username = await determine_username(hub, username, temporary_user=temporary_user)
         try:
             jupyter = await hub.ensure_server(username, create_user=create_user)
 

@@ -4,29 +4,32 @@ Automation of JupyterHub
 
 # Command Line Usage
 
-Bellow are some example use cases of the tool
+Below are some example use cases of the tool. Note that with an admin
+api token you can impersonate users and create temporary
+users. Service api tokens do not have an associated user therefore
+must run as existing users or temporary users.
 
-## Run notebook as given user syncronously
-
-You can run a given notebook as a pre-existing user syncronously. The
-api token either has to be for the given user or an admin token.
-
-```shell
-export JUPYTERHUB_API_TOKEN=<api-token>
-jhubctl --verbose run --username <username> --notebook <notebook> --hub <hub_url>
-```
-
-## Run notebook as given user syncronously and validate notebook output matches
+## Run notebook as given token user syncronously
 
 You can run a given notebook as a pre-existing user syncronously. The
 api token either has to be for the given user or an admin token.
 
 ```shell
 export JUPYTERHUB_API_TOKEN=<api-token>
-jhubctl run --username <username> --notebook <notebook> --hub <hub_url> --validate
+jhubctl --verbose run --notebook <notebook> --hub <hub_url>
 ```
 
-## Run notebook asyncronously and shutdown server after completion
+## Run notebook as given token user syncronously and validate notebook output matches
+
+You can run a given notebook as a pre-existing user syncronously. The
+api token either has to be for the given user or an admin token.
+
+```shell
+export JUPYTERHUB_API_TOKEN=<api-token>
+jhubctl run --notebook <notebook> --hub <hub_url> --validate
+```
+
+## Run notebook as given token user asyncronously and shutdown server after completion
 
 You can run a given notebook as a pre-existing user asyncronously and
 stop server after completion. The api token either has to be for the
@@ -34,7 +37,7 @@ given user or an admin token.
 
 ```shell
 export JUPYTERHUB_API_TOKEN=<api-token>
-jhubctl run --username <username> --notebook <notebook> --hub <hub_url> --daemonize --stop-server
+jhubctl run --notebook <notebook> --hub <hub_url> --daemonize --stop-server
 ```
 
 ## Run a given notebook as a temporary user
