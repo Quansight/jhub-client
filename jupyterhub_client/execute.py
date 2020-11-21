@@ -42,13 +42,13 @@ async def determine_username(hub, username=None, user_format='user-{user}-{id}',
         return username
 
 
-async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, username_format='user-{user}-{id}', service_format='service-{name}-{id}', timeout=None, daemonized=False, validate=False, stop_server=True):
+async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, timeout=None, daemonized=False, validate=False, stop_server=True, user_options=None):
     hub = JupyterHubAPI(hub_url)
 
     async with hub:
         username = await determine_username(hub, username, temporary_user=temporary_user)
         try:
-            jupyter = await hub.ensure_server(username, create_user=create_user)
+            jupyter = await hub.ensure_server(username, create_user=create_user, user_options=user_options)
 
             async with jupyter:
                 kernel_id, kernel = await jupyter.ensure_kernel()

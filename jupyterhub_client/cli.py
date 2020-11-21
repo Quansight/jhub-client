@@ -2,6 +2,7 @@ import argparse
 import logging
 import asyncio
 import sys
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ def create_run_subcommand(subparser):
     subparser.add_argument("-n", "--notebook", type=str, help="notebook to run", required=True)
     subparser.add_argument("--hub", type=str, default="http://localhost:8000", help="url for running jupyterhub cluster")
     subparser.add_argument("-u", "--username", type=str, help="username to run notebook as")
+    subparser.add_argument("--user-options", type=str, help="json object representing user server options")
     subparser.add_argument("--temporary-user", action='store_true', default=False, help="create user temporarily if does not exist")
     subparser.add_argument('-d', '--daemonize', action='store_true', default=False, help='run notebook asyncronously')
     subparser.add_argument('--stop-server', action='store_true', default=False, help='stop server after completion of notebook')
@@ -39,6 +41,13 @@ def handle_run(args):
     from jupyterhub_client.execute import execute_notebook
 
     loop = asyncio.get_event_loop()
+
+    try:
+        user_options = json.loads(args.user_options or '{}')
+    except json.decoder.JSONDecodeError:
+        logger.error(f'unable to json parse user options="{args.user_options}"')
+        sys.exit(1)
+
     kwargs = {
         'hub_url': args.hub,
         'notebook_path': args.notebook,
@@ -48,7 +57,8 @@ def handle_run(args):
         'delete_user': args.temporary_user,
         'validate': args.validate,
         'daemonized': args.daemonize,
-        'stop_server': args.stop_server
+        'stop_server': args.stop_server,
+        'user_options': args.user_options,
     }
 
     if args.daemonize and args.temporary_user:

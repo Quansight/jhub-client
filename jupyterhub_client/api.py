@@ -61,12 +61,12 @@ class JupyterHubAPI:
     async def ensure_server(self, username, user_options=None, create_user=False):
         user = await self.ensure_user(username, create_user=create_user)
         if user['server'] is None:
-            await self.create_server(username)
+            await self.create_server(username, user_options=user_options)
         return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
-        async with self.session.post(self.api_url / 'users' / username / 'server') as response:
+        async with self.session.post(self.api_url / 'users' / username / 'server', data=user_options) as response:
             if response.status == 400:
                 raise ValueError(f'server for username={username} is already running')
             elif response.status == 201:
