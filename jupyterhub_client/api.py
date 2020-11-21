@@ -113,7 +113,6 @@ class JupyterAPI:
 
         async with self.session.post(self.api_url / 'kernels', json=data) as response:
             data = await response.json()
-            print('asdf', data)
             logger.info(f'created kernel_spec={kernel_spec} kernel={data["id"]} for jupyter')
             return data
 
@@ -130,9 +129,10 @@ class JupyterAPI:
         if kernel_spec is None:
             kernel_spec = kernel_specs['default']
         else:
+            available_kernel_specs = list(kernel_specs["kernelspecs"].keys())
             if kernel_spec not in kernel_specs['kernelspecs']:
-                logger.error(f'kernel_spec={kernel_spec} not listed in available kernel specifications')
-                raise ValueError(f'kernel_spec={kernel_spec} not listed in available kernel specifications')
+                logger.error(f'kernel_spec={kernel_spec} not listed in available kernel specifications={available_kernel_specs}')
+                raise ValueError(f'kernel_spec={kernel_spec} not listed in available kernel specifications={available_kernel_specs}')
 
         kernel_id = (await self.create_kernel(kernel_spec=kernel_spec))['id']
         return kernel_id, JupyterKernelAPI(self.api_url / 'kernels' / kernel_id, self.api_token)

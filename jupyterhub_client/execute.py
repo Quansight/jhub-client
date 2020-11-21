@@ -31,7 +31,7 @@ async def determine_username(hub, username=None, user_format='user-{user}-{id}',
     if username is None and not temporary_user:
         if token['kind'] == 'service':
             logger.error('cannot execute without specified username or temporary_user=True for service api token')
-            sys.exit(1)
+            raise ValueError('Service api token cannot execute without specified username or temporary_user=True for')
         return token['name']
     elif username is None and temporary_user:
         if token['kind'] == 'service':
