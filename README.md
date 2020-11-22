@@ -69,7 +69,7 @@ jhubctl run --notebook <notebook> --hub <hub_url> --daemonize --stop-server
 
 ### Run notebook as given token user with user options
 
-While this is an advanced user case, it is often times encountered
+While this is an advanced use case, it is often times encountered
 with kubernetes jupyerhub clusters where you may want to select a
 given profile e.g. small, medium, gpu jupyterlab session. For these
 clusters you must supply `--user-options='{"profile": 0}'` where 0 is
@@ -79,6 +79,14 @@ options must be used.
 
 ```shell
 jhubctl run --notebook <notebook> --hub <hub_url> --user-options='{"profile": 1}'
+```
+
+### Run notebook as given token user with user options
+
+You can run a given notebook with any available kernel spec.
+
+```shell
+jhubctl run --notebook <notebook> --hub <hub_url> --kernel-spec=python3
 ```
 
 ### Run a given notebook as a temporary user
