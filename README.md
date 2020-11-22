@@ -19,8 +19,8 @@ export JUPYTERHUB_API_TOKEN=<api-token>
 
 ```shell
 usage: __main__.py run [-h] -n NOTEBOOK [--hub HUB] [-u USERNAME]
-                       [--user-options USER_OPTIONS] [--temporary-user] [-d]
-                       [--stop-server] [--validate]
+                       [--user-options USER_OPTIONS] [--temporary-user] [-d] [--stop-server]
+                       [--validate] [--kernel-spec KERNEL_SPEC]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -35,6 +35,8 @@ optional arguments:
   -d, --daemonize       run notebook asyncronously
   --stop-server         stop server after completion of notebook
   --validate            validate notebook output matches
+  --kernel-spec KERNEL_SPEC
+                        kernel spec to launch is not specified will use default
 ```
 
 ### Run notebook as given token user syncronously
