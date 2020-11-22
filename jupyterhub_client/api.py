@@ -2,6 +2,7 @@ import os
 import uuid
 import logging
 import time
+import asyncio
 
 import yarl
 import aiohttp
@@ -58,11 +59,24 @@ class JupyterHubAPI:
             elif response.status == 404:
                 raise ValueError(f'username={username} does not exist cannot delete')
 
-    async def ensure_server(self, username, user_options=None, create_user=False):
+    async def ensure_server(self, username, user_options=None, create_user=False, timeout=60):
         user = await self.ensure_user(username, create_user=create_user)
         if user['server'] is None:
             await self.create_server(username, user_options=user_options)
-        return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
+
+        start_time = time.time()
+        while True:
+            user = await self.get_user(username)
+            if user['server'] and user['pending'] is None:
+                return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
+
+            await asyncio.sleep(5)
+            total_time = time.time() - start_time
+            if total_time > timeout:
+                logger.error(f'jupyterhub server creation timeout={timeout:.0f} [s]')
+                raise TimeoutError(f'jupyterhub server creation timeout={timeout:.0f} [s]')
+
+            logger.info(f'pending spawn polling for seconds={total_time:.0f} [s]')
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
