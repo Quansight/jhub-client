@@ -21,7 +21,6 @@ async def test_execute_code(cells):
     await execute_code(hub_url='http://localhost:8000', cells=cells, create_user=True, delete_user=True, temporary_user=True)
 
 
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize('notebook_path', [
    'tests/assets/notebook/simple.ipynb',

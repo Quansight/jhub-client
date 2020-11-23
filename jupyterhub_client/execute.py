@@ -44,6 +44,7 @@ async def determine_username(hub, username=None, user_format='user-{user}-{id}',
 
 async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, timeout=None, daemonized=False, validate=False, stop_server=True, user_options=None, kernel_spec=None):
     hub = JupyterHubAPI(hub_url)
+    result_cells = []
 
     async with hub:
         username = await determine_username(hub, username, temporary_user=temporary_user)
@@ -61,6 +62,7 @@ async def execute_code(hub_url, cells, username=None, temporary_user=False, crea
 
                     for i, (code, expected_result) in enumerate(cells):
                         kernel_result = await kernel.send_code(username, code, timeout=timeout, wait=(not daemonized))
+                        result_cells.append((code, kernel_result))
                         if daemonized:
                             logger.debug(f'kernel submitted cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
                         else:
@@ -81,7 +83,9 @@ async def execute_code(hub_url, cells, username=None, temporary_user=False, crea
             if delete_user and not daemonized:
                 await hub.delete_user(username)
 
+        return result_cells
+
 
 async def execute_notebook(hub_url, notebook_path, **kwargs):
     cells = parse_notebook_cells(notebook_path)
-    await execute_code(hub_url, cells, **kwargs)
+    return await execute_code(hub_url, cells, **kwargs)
