@@ -21,6 +21,33 @@ def parse_notebook_cells(notebook_path):
     return cells
 
 
+def render_notebook(cells):
+    notebook_template = {
+        "cells": [],
+        "nbformat": 4,
+        "nbformat_minor": 4,
+        "metadata": { }
+    }
+
+    for i, (code, result) in enumerate(cells, start=1):
+        notebook_template['cells'].append({
+            'cell_type': 'code',
+            'execution_count': i,
+            'metadata': {},
+            'outputs': [{
+                'data': {
+                    'text/plain': result
+                },
+                "execution_count": i,
+                "metadata": {},
+                "output_type": "execute_result"
+            }],
+            'source': code
+        })
+
+    return notebook_template
+
+
 TEMPLATE_SCRIPT_HEADER = '''
 import os
 import sys

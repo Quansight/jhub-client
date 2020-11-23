@@ -35,11 +35,13 @@ def create_run_subcommand(subparser):
     subparser.add_argument('--stop-server', action='store_true', default=False, help='stop server after completion of notebook')
     subparser.add_argument('--validate', action='store_true', default=False, help='validate notebook output matches')
     subparser.add_argument('--kernel-spec', type=str, help='kernel spec to launch is not specified will use default')
+    subparser.add_argument('--output-filename', type=str, help='output filename for results of running notebook')
     subparser.set_defaults(func=handle_run)
 
 
 def handle_run(args):
     from jupyterhub_client.execute import execute_notebook
+    from jupyterhub_client.utils import render_notebook
 
     loop = asyncio.get_event_loop()
 
@@ -70,4 +72,14 @@ def handle_run(args):
         logger.error('running notebook in daemonized mode does not support validation')
         sys.exit(1)
 
-    loop.run_until_complete(execute_notebook(**kwargs))
+    if args.daemonize and args.output_filename:
+        logger.error('running notebooks in daemonized mode does not support writing output to notebook')
+        sys.exit(1)
+
+    cell_results = loop.run_until_complete(execute_notebook(**kwargs))
+
+    if args.output_filename:
+        output_notebook = render_notebook(cell_results)
+
+        with open(args.output_filename, 'w') as f:
+            json.dump(output_notebook, f, indent=4)
