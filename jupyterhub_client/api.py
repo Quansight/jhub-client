@@ -47,7 +47,13 @@ class JupyterHubAPI:
         async with self.session.post(self.api_url / 'users' / username) as response:
             if response.status == 201:
                 logger.info(f'created username={username}')
-                return await response.json()
+                resp = await response.json()
+                # Create a new token for the user
+                async with self.session.post(self.api_url / 'users' / username / 'tokens') as r:
+                    token_resp = await r.json()
+                    # Use the user token to authenticate the following kernel requests
+                    self.api_token = token_resp['token']
+                return resp
             elif response.status == 409:
                 raise ValueError(f'username={username} already exists')
             print(response.status, await response.content.read())
