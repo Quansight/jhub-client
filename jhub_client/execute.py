@@ -42,14 +42,33 @@ async def determine_username(hub, username=None, user_format='user-{user}-{id}',
         return username
 
 
-async def execute_code(hub_url, cells, username=None, temporary_user=False, create_user=False, delete_user=False, timeout=None, daemonized=False, validate=False, stop_server=True, user_options=None, kernel_spec=None):
+async def execute_code(
+    hub_url,
+    cells,
+    username=None,
+    temporary_user=False,
+    create_user=False,
+    delete_user=False,
+    server_creation_timeout=None,
+    kernel_execution_timeout=None,
+    daemonized=False,
+    validate=False,
+    stop_server=True,
+    user_options=None,
+    kernel_spec=None
+):
     hub = JupyterHubAPI(hub_url)
     result_cells = []
 
     async with hub:
         username = await determine_username(hub, username, temporary_user=temporary_user)
         try:
-            jupyter = await hub.ensure_server(username, create_user=create_user, user_options=user_options)
+            jupyter = await hub.ensure_server(
+                username,
+                create_user=create_user,
+                user_options=user_options,
+                timeout=server_creation_timeout
+            )
 
             async with jupyter:
                 kernel_id, kernel = await jupyter.ensure_kernel(kernel_spec=kernel_spec)
@@ -61,7 +80,12 @@ async def execute_code(hub_url, cells, username=None, temporary_user=False, crea
                         ), wait=False)
 
                     for i, (code, expected_result) in enumerate(cells):
-                        kernel_result = await kernel.send_code(username, code, timeout=timeout, wait=(not daemonized))
+                        kernel_result = await kernel.send_code(
+                            username,
+                            code,
+                            timeout=kernel_execution_timeout,
+                            wait=(not daemonized)
+                        )
                         result_cells.append((code, kernel_result))
                         if daemonized:
                             logger.debug(f'kernel submitted cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
