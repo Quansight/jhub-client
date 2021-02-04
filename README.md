@@ -1,6 +1,14 @@
 # JupyterHub Client
 
+![PyPI](https://img.shields.io/pypi/v/jhub-client)
+
 Automation of JupyterHub
+
+# Install
+
+```shell
+pip install jhub-client
+```
 
 # Command Line Usage
 
@@ -18,6 +26,7 @@ export JUPYTERHUB_API_TOKEN=<api-token>
 ## Run
 
 ```shell
+$ jhubctl --help
 usage: __main__.py run [-h] -n NOTEBOOK [--hub HUB] [-u USERNAME]
                        [--user-options USER_OPTIONS] [--temporary-user] [-d]
                        [--stop-server] [--validate]
