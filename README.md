@@ -160,3 +160,12 @@ c.JupyterHub.services = [
     }
 ]
 ```
+
+# Code of Conduct
+
+To guarantee a welcoming and friendly community, we require contributors to follow our [Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+
+# License
+
+x[jhub-client](https://github.com/Quansight/jhub-client/blob/main/LICENSE)
+is BSD-3 Licensed
