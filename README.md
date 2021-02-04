@@ -9,7 +9,7 @@ api token you can impersonate users and create temporary
 users. Service api tokens do not have an associated user therefore
 must run as existing users or temporary users.
 
-Set the api token used for `jhubctl`.
+Set the api token used for `jhub-client`.
 
 ```shell
 export JUPYTERHUB_API_TOKEN=<api-token>

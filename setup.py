@@ -7,12 +7,12 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 
 setup(
-    name='jupyterhub_client',
+    name='jhub-client',
     version='0.1.0',
     description='Library and Client for managing, benchmarking, and interacting with jupyterhub',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/costrouc/jupyterhub_client',
+    url='https://github.com/costrouc/jhub-client',
     author='Christopher Ostrouchov',
     author_email='chris.ostrouchov@gmail.com',
      classifiers=[
@@ -26,7 +26,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3 :: Only',
     ],
-    keywords='jupyterhub, jupyter',
+    keywords='jupyterhub, jupyter, benchmark',
     packages=find_packages(where='.'),
     install_requires=['aiohttp', 'yarl'],
     extras_require={
@@ -34,7 +34,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'jhubctl=jupyterhub_client.__main__:main',
+            'jhubctl=jhub_client.__main__:main',
         ],
     },
 )
