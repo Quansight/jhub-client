@@ -1,6 +1,6 @@
 import asyncio
 
-from jupyterhub_client.execute import execute_code
+from jhub_client.execute import execute_code
 
 
 async def simulate_users(hub_url, num_users, user_generator, workflow='concurrent'):

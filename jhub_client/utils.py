@@ -54,7 +54,7 @@ import sys
 import logging
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('jupyterhub_client')
+logger = logging.getLogger('jhub_client')
 
 OUTPUT_FORMAT = '{output_format}'
 STDOUT_FILENAME = os.path.expanduser('{stdout_filename}')

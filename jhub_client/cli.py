@@ -12,7 +12,7 @@ def cli(args=None):
     subparser = parser.add_subparsers(help="jupyterhub client cli")
     create_run_subcommand(subparser)
     parser.set_defaults(func=None)
-    parser.add_argument("-v", "--verbose", action="store_true", help="turn on jupyterhub_client debugging")
+    parser.add_argument("-v", "--verbose", action="store_true", help="turn on jhub_client debugging")
     args = parser.parse_args(args)
 
     if args.func is None:
@@ -40,8 +40,8 @@ def create_run_subcommand(subparser):
 
 
 def handle_run(args):
-    from jupyterhub_client.execute import execute_notebook
-    from jupyterhub_client.utils import render_notebook
+    from jhub_client.execute import execute_notebook
+    from jhub_client.utils import render_notebook
 
     loop = asyncio.get_event_loop()
 

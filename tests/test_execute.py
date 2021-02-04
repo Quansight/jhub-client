@@ -1,6 +1,6 @@
 import pytest
 
-from jupyterhub_client.execute import execute_code, execute_notebook
+from jhub_client.execute import execute_code, execute_notebook
 
 
 @pytest.mark.asyncio

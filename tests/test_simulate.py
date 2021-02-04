@@ -2,8 +2,8 @@ import uuid
 
 import pytest
 
-from jupyterhub_client.simulate import simulate_users
-from jupyterhub_client.utils import parse_notebook_cells
+from jhub_client.simulate import simulate_users
+from jhub_client.utils import parse_notebook_cells
 
 
 @pytest.mark.asyncio

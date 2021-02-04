@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from jupyterhub_client.api import JupyterKernelAPI, JupyterAPI
+from jhub_client.api import JupyterKernelAPI, JupyterAPI
 
 
 @pytest.mark.asyncio

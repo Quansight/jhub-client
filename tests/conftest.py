@@ -1,6 +1,6 @@
 import pytest
 
-from jupyterhub_client.api import JupyterHubAPI
+from jhub_client.api import JupyterHubAPI
 
 
 @pytest.fixture

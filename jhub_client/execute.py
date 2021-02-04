@@ -5,14 +5,14 @@ import textwrap
 import datetime
 import sys
 
-from jupyterhub_client.api import JupyterHubAPI, JupyterKernelAPI, JupyterAPI
-from jupyterhub_client.utils import parse_notebook_cells, tangle_cells
+from jhub_client.api import JupyterHubAPI, JupyterKernelAPI, JupyterAPI
+from jhub_client.utils import parse_notebook_cells, tangle_cells
 
 logger = logging.getLogger(__name__)
 
 
 DAEMONIZED_STOP_SERVER_HEADER = '''
-def _jupyerhub_client_stop_server():
+def _jhub_client_stop_server():
     import urllib.request
     request = urllib.request.Request(url="{delete_server_endpoint}", method= "DELETE")
     request.add_header("Authorization", "token {api_token}")
@@ -74,7 +74,7 @@ async def execute_code(hub_url, cells, username=None, temporary_user=False, crea
                                 raise ValueError(f'execution of cell={i} did not match expected result diff={diff}')
 
                     if daemonized and stop_server:
-                        await kernel.send_code(username, '__jupyterhub_client_stop_server()', wait=False)
+                        await kernel.send_code(username, '__jhub_client_stop_server()', wait=False)
                 if not daemonized:
                     await jupyter.delete_kernel(kernel_id)
             if not daemonized and stop_server:

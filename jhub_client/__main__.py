@@ -1,4 +1,4 @@
-from jupyterhub_client.cli import cli
+from jhub_client.cli import cli
 
 def main():
     cli()
