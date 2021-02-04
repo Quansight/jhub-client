@@ -65,7 +65,7 @@ class JupyterHubAPI:
             elif response.status == 404:
                 raise ValueError(f'username={username} does not exist cannot delete')
 
-    async def ensure_server(self, username, user_options=None, create_user=False, timeout=60):
+    async def ensure_server(self, username, timeout, user_options=None, create_user=False):
         user = await self.ensure_user(username, create_user=create_user)
         if user['server'] is None:
             await self.create_server(username, user_options=user_options)
