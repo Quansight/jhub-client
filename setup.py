@@ -12,7 +12,7 @@ setup(
     description='Library and Client for managing, benchmarking, and interacting with jupyterhub',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/costrouc/jhub-client',
+    url='https://github.com/Quansight/jhub-client',
     author='Christopher Ostrouchov',
     author_email='chris.ostrouchov@gmail.com',
      classifiers=[
