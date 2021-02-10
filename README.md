@@ -142,7 +142,7 @@ Access the hub control page. The url will be `<hub_url>/hub/home`.
 
 Click on `Token` in top left corner and request new api token. This
 token will have the permissions of the user. Make sure to set the
-environment variable `JUPYTERLAB_API_TOKEN` to the value of the given
+environment variable `JUPYTERHUB_API_TOKEN` to the value of the given
 token.
 
 ![qhub token](./images/token.png)
