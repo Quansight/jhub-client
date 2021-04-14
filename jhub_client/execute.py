@@ -64,8 +64,9 @@ async def execute_code(
     stop_server=True,
     user_options=None,
     kernel_spec=None,
+    auth_type='token',
 ):
-    hub = JupyterHubAPI(hub_url)
+    hub = JupyterHubAPI(hub_url, auth_type=auth_type)
     result_cells = []
 
     async with hub:
