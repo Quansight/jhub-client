@@ -32,6 +32,15 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install .[dev]
+      - name: Black Formatting
+        run: |
+          black --version
+          black jhub_client --diff
+          black --check jhub_client
+      - name: Flake8 Formatting
+        run: |
+          flake8 --version
+          flake8
       - name: Run tests
         run: |
           pytest -v

@@ -23,7 +23,7 @@ async def test_execute_code(cells):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('notebook_path', [
-   'tests/assets/notebook/simple.ipynb',
+    'tests/assets/notebook/simple.ipynb',
 ])
 async def test_execute_notebook(notebook_path):
     await execute_notebook(hub_url='http://localhost:8000', notebook_path=notebook_path, create_user=True, delete_user=True, temporary_user=True)
