@@ -26,6 +26,16 @@ def cli(args=None):
     args.func(args)
 
 
+def create_token_subcommand(subparser):
+    subparser = subparser.add_parser("token")
+    subparser.add_argumnet("--name", default='jhub-client', type=str, help='name to give to jupyterhub api token')
+    subparser.set_defaults(func=handle_token)
+
+
+def handle_token(args):
+    pass
+
+
 def create_run_subcommand(subparser):
     subparser = subparser.add_parser("run")
     subparser.add_argument(
