@@ -15,21 +15,21 @@ logger = logging.getLogger(__name__)
 
 
 class JupyterHubAPI:
-    def __init__(self, hub_url, auth_type='token', **kwargs):
+    def __init__(self, hub_url, auth_type="token", **kwargs):
         self.hub_url = yarl.URL(hub_url)
-        self.api_url = self.hub_url / 'hub/api'
+        self.api_url = self.hub_url / "hub/api"
         self.auth_type = auth_type
 
-        if auth_type == 'token':
-            self.api_token = kwargs.get('api_token', os.environ['JUPYTERHUB_API_TOKEN'])
-        elif auth_type == 'basic':
-            self.username = kwargs.get('username', os.environ['JUPYTERHUB_USERNAME'])
-            self.password = kwargs.get('password', os.environ['JUPYTERHUB_PASSWORD'])
+        if auth_type == "token":
+            self.api_token = kwargs.get("api_token", os.environ["JUPYTERHUB_API_TOKEN"])
+        elif auth_type == "basic":
+            self.username = kwargs.get("username", os.environ["JUPYTERHUB_USERNAME"])
+            self.password = kwargs.get("password", os.environ["JUPYTERHUB_PASSWORD"])
 
     async def __aenter__(self):
-        if self.auth_type == 'token':
+        if self.auth_type == "token":
             self.session = await auth.token_authentication(self.api_token)
-        elif self.auth_type == 'basic':
+        elif self.auth_type == "basic":
             self.session = await auth.basic_authentication(self.username, self.password)
             self.api_token = await self.create_token(self.username)
         return self
@@ -60,12 +60,12 @@ class JupyterHubAPI:
     async def create_user(self, username):
         async with self.session.post(self.api_url / "users" / username) as response:
             if response.status == 201:
-                logger.info(f'created username={username}')
+                logger.info(f"created username={username}")
                 response = await response.json()
                 self.api_token = await self.create_token(username)
                 return response
             elif response.status == 409:
-                raise ValueError(f'username={username} already exists')
+                raise ValueError(f"username={username} already exists")
 
     async def delete_user(self, username):
         async with self.session.delete(self.api_url / "users" / username) as response:
@@ -98,11 +98,11 @@ class JupyterHubAPI:
             logger.info(f"pending spawn polling for seconds={total_time:.0f} [s]")
 
     async def create_token(self, username, token_name=None):
-        token_name = token_name or f'jhub-client-{datetime.date.today()}'
-        async with self.session.post(self.api_url / 'users' / username / 'tokens', json={
-                'note': token_name
-        }) as response:
-            return (await response.json())['token']
+        token_name = token_name or f"jhub-client-{datetime.date.today()}"
+        async with self.session.post(
+            self.api_url / "users" / username / "tokens", json={"note": token_name}
+        ) as response:
+            return (await response.json())["token"]
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
