@@ -11,6 +11,7 @@ def cli(args=None):
     parser = argparse.ArgumentParser(description="jupyterhub client cli")
     subparser = parser.add_subparsers(help="jupyterhub client cli")
     create_run_subcommand(subparser)
+    create_token_subcommand(subparser)
     parser.set_defaults(func=None)
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="turn on jhub_client debugging"
@@ -28,6 +29,12 @@ def cli(args=None):
 
 def create_token_subcommand(subparser):
     subparser = subparser.add_parser("token")
+    subparser.add_argument(
+        "--hub",
+        type=str,
+        default="http://localhost:8000",
+        help="url for running jupyterhub cluster",
+    )
     subparser.add_argumnet(
         "--name",
         default="jhub-client",
@@ -38,7 +45,15 @@ def create_token_subcommand(subparser):
 
 
 def handle_token(args):
-    pass
+    from jhub_client.api import JupyterHubAPI
+
+    async def create_token(hub):
+        with JupyterHubAPI(hub, auth_type="basic") as hub:
+            token = await hub.create_token(hub.username, token_name=args.name)
+            print(f"API Token: {token}")
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(create_token(hub=args.hub))
 
 
 def create_run_subcommand(subparser):
