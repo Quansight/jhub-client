@@ -2,16 +2,14 @@ import uuid
 import difflib
 import logging
 import textwrap
-import datetime
-import sys
 
-from jhub_client.api import JupyterHubAPI, JupyterKernelAPI, JupyterAPI
-from jhub_client.utils import parse_notebook_cells, tangle_cells
+from jhub_client.api import JupyterHubAPI
+from jhub_client.utils import parse_notebook_cells
 
 logger = logging.getLogger(__name__)
 
 
-DAEMONIZED_STOP_SERVER_HEADER = '''
+DAEMONIZED_STOP_SERVER_HEADER = """
 def _jhub_client_stop_server():
     import urllib.request
     request = urllib.request.Request(url="{delete_server_endpoint}", method= "DELETE")
@@ -22,22 +20,32 @@ def custom_exc(shell, etype, evalue, tb, tb_offset=None):
      _jupyerhub_client_stop_server()
 
 get_ipython().set_custom_exc((Exception,), custom_exc)
-'''
+"""
 
 
-async def determine_username(hub, username=None, user_format='user-{user}-{id}', service_format='service-{name}-{id}', temporary_user=False):
+async def determine_username(
+    hub,
+    username=None,
+    user_format="user-{user}-{id}",
+    service_format="service-{name}-{id}",
+    temporary_user=False,
+):
     token = await hub.identify_token(hub.api_token)
 
     if username is None and not temporary_user:
-        if token['kind'] == 'service':
-            logger.error('cannot execute without specified username or temporary_user=True for service api token')
-            raise ValueError('Service api token cannot execute without specified username or temporary_user=True for')
-        return token['name']
+        if token["kind"] == "service":
+            logger.error(
+                "cannot execute without specified username or temporary_user=True for service api token"
+            )
+            raise ValueError(
+                "Service api token cannot execute without specified username or temporary_user=True for"
+            )
+        return token["name"]
     elif username is None and temporary_user:
-        if token['kind'] == 'service':
-            return service_format.format(id=str(uuid.uuid4()), name=token['name'])
+        if token["kind"] == "service":
+            return service_format.format(id=str(uuid.uuid4()), name=token["name"])
         else:
-            return user_format.format(id=str(uuid.uuid4()), name=token['name'])
+            return user_format.format(id=str(uuid.uuid4()), name=token["name"])
     else:
         return username
 
@@ -55,50 +63,73 @@ async def execute_code(
     validate=False,
     stop_server=True,
     user_options=None,
-    kernel_spec=None
+    kernel_spec=None,
 ):
     hub = JupyterHubAPI(hub_url)
     result_cells = []
 
     async with hub:
-        username = await determine_username(hub, username, temporary_user=temporary_user)
+        username = await determine_username(
+            hub, username, temporary_user=temporary_user
+        )
         try:
             jupyter = await hub.ensure_server(
                 username,
                 create_user=create_user,
                 user_options=user_options,
-                timeout=server_creation_timeout
+                timeout=server_creation_timeout,
             )
 
             async with jupyter:
                 kernel_id, kernel = await jupyter.ensure_kernel(kernel_spec=kernel_spec)
                 async with kernel:
                     if daemonized and stop_server:
-                        await kernel.send_code(username, DAEMONIZED_STOP_SERVER_HEADER.format(
-                            delete_server_endpoint = hub.api_url / 'users' / username / 'server',
-                            api_token=hub.api_token
-                        ), wait=False)
+                        await kernel.send_code(
+                            username,
+                            DAEMONIZED_STOP_SERVER_HEADER.format(
+                                delete_server_endpoint=hub.api_url
+                                / "users"
+                                / username
+                                / "server",
+                                api_token=hub.api_token,
+                            ),
+                            wait=False,
+                        )
 
                     for i, (code, expected_result) in enumerate(cells):
                         kernel_result = await kernel.send_code(
                             username,
                             code,
                             timeout=kernel_execution_timeout,
-                            wait=(not daemonized)
+                            wait=(not daemonized),
                         )
                         result_cells.append((code, kernel_result))
                         if daemonized:
-                            logger.debug(f'kernel submitted cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
+                            logger.debug(
+                                f'kernel submitted cell={i} code=\n{textwrap.indent(code, "   >>> ")}'
+                            )
                         else:
-                            logger.debug(f'kernel execucting cell={i} code=\n{textwrap.indent(code, "   >>> ")}')
-                            logger.debug(f'kernel result cell={i} result=\n{textwrap.indent(kernel_result, "   | ")}')
+                            logger.debug(
+                                f'kernel execucting cell={i} code=\n{textwrap.indent(code, "   >>> ")}'
+                            )
+                            logger.debug(
+                                f'kernel result cell={i} result=\n{textwrap.indent(kernel_result, "   | ")}'
+                            )
                             if validate and kernel_result != expected_result:
-                                diff = ''.join(difflib.unified_diff(kernel_result, expected_result))
-                                logger.error(f'kernel result did not match expected result diff={diff}')
-                                raise ValueError(f'execution of cell={i} did not match expected result diff={diff}')
+                                diff = "".join(
+                                    difflib.unified_diff(kernel_result, expected_result)
+                                )
+                                logger.error(
+                                    f"kernel result did not match expected result diff={diff}"
+                                )
+                                raise ValueError(
+                                    f"execution of cell={i} did not match expected result diff={diff}"
+                                )
 
                     if daemonized and stop_server:
-                        await kernel.send_code(username, '__jhub_client_stop_server()', wait=False)
+                        await kernel.send_code(
+                            username, "__jhub_client_stop_server()", wait=False
+                        )
                 if not daemonized:
                     await jupyter.delete_kernel(kernel_id)
             if not daemonized and stop_server:

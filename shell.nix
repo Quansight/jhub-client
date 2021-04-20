@@ -11,6 +11,8 @@ pkgs.mkShell {
 
     pytest
     pytest-asyncio
+    black
+    flake8
   ];
 
   shellHook = ''

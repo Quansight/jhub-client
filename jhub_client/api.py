@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 class JupyterHubAPI:
     def __init__(self, hub_url, api_token=None):
         self.hub_url = yarl.URL(hub_url)
-        self.api_url = self.hub_url / 'hub/api'
-        self.api_token = api_token or os.environ['JUPYTERHUB_API_TOKEN']
+        self.api_url = self.hub_url / "hub/api"
+        self.api_token = api_token or os.environ["JUPYTERHUB_API_TOKEN"]
 
     async def __aenter__(self):
-        self.session = aiohttp.ClientSession(headers={
-            'Authorization': f'token {self.api_token}'
-        })
+        self.session = aiohttp.ClientSession(
+            headers={"Authorization": f"token {self.api_token}"}
+        )
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -31,158 +31,184 @@ class JupyterHubAPI:
             if create_user:
                 await self.create_user(username)
             else:
-                raise ValueError(f'current username={username} does not exist and create_user={create_user}')
+                raise ValueError(
+                    f"current username={username} does not exist and create_user={create_user}"
+                )
             user = await self.get_user(username)
         return user
 
     async def get_user(self, username):
-        async with self.session.get(self.api_url / 'users' / username) as response:
+        async with self.session.get(self.api_url / "users" / username) as response:
             if response.status == 200:
                 return await response.json()
             elif response.status == 404:
-                logger.info(f'username={username} does not exist')
+                logger.info(f"username={username} does not exist")
                 return None
 
     async def create_user(self, username):
-        async with self.session.post(self.api_url / 'users' / username) as response:
+        async with self.session.post(self.api_url / "users" / username) as response:
             if response.status == 201:
-                logger.info(f'created username={username}')
+                logger.info(f"created username={username}")
                 resp = await response.json()
                 # Create a new token for the user
-                async with self.session.post(self.api_url / 'users' / username / 'tokens') as r:
+                async with self.session.post(
+                    self.api_url / "users" / username / "tokens"
+                ) as r:
                     token_resp = await r.json()
                     # Use the user token to authenticate the following kernel requests
-                    self.api_token = token_resp['token']
+                    self.api_token = token_resp["token"]
                 return resp
             elif response.status == 409:
-                raise ValueError(f'username={username} already exists')
+                raise ValueError(f"username={username} already exists")
             print(response.status, await response.content.read())
 
     async def delete_user(self, username):
-        async with self.session.delete(self.api_url / 'users' / username) as response:
+        async with self.session.delete(self.api_url / "users" / username) as response:
             if response.status == 204:
-                logger.info(f'deleted username={username}')
+                logger.info(f"deleted username={username}")
             elif response.status == 404:
-                raise ValueError(f'username={username} does not exist cannot delete')
+                raise ValueError(f"username={username} does not exist cannot delete")
 
-    async def ensure_server(self, username, timeout, user_options=None, create_user=False):
+    async def ensure_server(
+        self, username, timeout, user_options=None, create_user=False
+    ):
         user = await self.ensure_user(username, create_user=create_user)
-        if user['server'] is None:
+        if user["server"] is None:
             await self.create_server(username, user_options=user_options)
 
         start_time = time.time()
         while True:
             user = await self.get_user(username)
-            if user['server'] and user['pending'] is None:
-                return JupyterAPI(self.hub_url / 'user' / username, self.api_token)
+            if user["server"] and user["pending"] is None:
+                return JupyterAPI(self.hub_url / "user" / username, self.api_token)
 
             await asyncio.sleep(5)
             total_time = time.time() - start_time
             if total_time > timeout:
-                logger.error(f'jupyterhub server creation timeout={timeout:.0f} [s]')
-                raise TimeoutError(f'jupyterhub server creation timeout={timeout:.0f} [s]')
+                logger.error(f"jupyterhub server creation timeout={timeout:.0f} [s]")
+                raise TimeoutError(
+                    f"jupyterhub server creation timeout={timeout:.0f} [s]"
+                )
 
-            logger.info(f'pending spawn polling for seconds={total_time:.0f} [s]')
+            logger.info(f"pending spawn polling for seconds={total_time:.0f} [s]")
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
-        async with self.session.post(self.api_url / 'users' / username / 'server', data=user_options) as response:
+        async with self.session.post(
+            self.api_url / "users" / username / "server", data=user_options
+        ) as response:
             if response.status == 400:
-                raise ValueError(f'server for username={username} is already running')
+                raise ValueError(f"server for username={username} is already running")
             elif response.status == 201:
-                logger.info(f'created server for username={username} with user_options={user_options}')
+                logger.info(
+                    f"created server for username={username} with user_options={user_options}"
+                )
                 return True
 
     async def delete_server(self, username):
-        await self.session.delete(self.api_url / 'users' / username / 'server')
-        logger.info(f'deleted server for username={username}')
+        await self.session.delete(self.api_url / "users" / username / "server")
+        logger.info(f"deleted server for username={username}")
 
     async def info(self):
-        async with self.session.post(self.api_url / 'info') as response:
+        async with self.session.post(self.api_url / "info") as response:
             return await response.json()
 
     async def list_users(self):
-        async with self.session.get(self.api_url / 'users') as response:
+        async with self.session.get(self.api_url / "users") as response:
             return await response.json()
 
     async def list_proxy(self):
-        async with self.session.get(self.api_url / 'proxy') as response:
+        async with self.session.get(self.api_url / "proxy") as response:
             return await response.json()
 
     async def identify_token(self, token):
-        async with self.session.get(self.api_url / 'authorizations' / 'token' / token) as response:
+        async with self.session.get(
+            self.api_url / "authorizations" / "token" / token
+        ) as response:
             return await response.json()
 
 
 class JupyterAPI:
     def __init__(self, notebook_url, api_token):
-        self.api_url = yarl.URL(notebook_url) / 'api'
-        self.api_token = api_token or os.environ['JUPYTERHUB_API_TOKEN']
+        self.api_url = yarl.URL(notebook_url) / "api"
+        self.api_token = api_token or os.environ["JUPYTERHUB_API_TOKEN"]
 
     async def __aenter__(self):
-        self.session = aiohttp.ClientSession(headers={
-            'Authorization': f'token {self.api_token}'
-        })
+        self.session = aiohttp.ClientSession(
+            headers={"Authorization": f"token {self.api_token}"}
+        )
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
         await self.session.close()
 
     async def create_kernel(self, kernel_spec=None):
-        data = {'kernel_spec': kernel_spec} if kernel_spec else None
+        data = {"kernel_spec": kernel_spec} if kernel_spec else None
 
-        async with self.session.post(self.api_url / 'kernels', json=data) as response:
+        async with self.session.post(self.api_url / "kernels", json=data) as response:
             data = await response.json()
-            logger.info(f'created kernel_spec={kernel_spec} kernel={data["id"]} for jupyter')
+            logger.info(
+                f'created kernel_spec={kernel_spec} kernel={data["id"]} for jupyter'
+            )
             return data
 
     async def list_kernel_specs(self):
-        async with self.session.get(self.api_url / 'kernelspecs') as response:
+        async with self.session.get(self.api_url / "kernelspecs") as response:
             return await response.json()
 
     async def list_kernels(self):
-        async with self.session.get(self.api_url / 'kernels') as response:
+        async with self.session.get(self.api_url / "kernels") as response:
             return await response.json()
 
     async def ensure_kernel(self, kernel_spec=None):
         kernel_specs = await self.list_kernel_specs()
         if kernel_spec is None:
-            kernel_spec = kernel_specs['default']
+            kernel_spec = kernel_specs["default"]
         else:
             available_kernel_specs = list(kernel_specs["kernelspecs"].keys())
-            if kernel_spec not in kernel_specs['kernelspecs']:
-                logger.error(f'kernel_spec={kernel_spec} not listed in available kernel specifications={available_kernel_specs}')
-                raise ValueError(f'kernel_spec={kernel_spec} not listed in available kernel specifications={available_kernel_specs}')
+            if kernel_spec not in kernel_specs["kernelspecs"]:
+                logger.error(
+                    f"kernel_spec={kernel_spec} not listed in available kernel specifications={available_kernel_specs}"
+                )
+                raise ValueError(
+                    f"kernel_spec={kernel_spec} not listed in available kernel specifications={available_kernel_specs}"
+                )
 
-        kernel_id = (await self.create_kernel(kernel_spec=kernel_spec))['id']
-        return kernel_id, JupyterKernelAPI(self.api_url / 'kernels' / kernel_id, self.api_token)
+        kernel_id = (await self.create_kernel(kernel_spec=kernel_spec))["id"]
+        return kernel_id, JupyterKernelAPI(
+            self.api_url / "kernels" / kernel_id, self.api_token
+        )
 
     async def get_kernel(self, kernel_id):
-        async with self.session.get(self.api_url / 'kernels' / kernel_id) as response:
+        async with self.session.get(self.api_url / "kernels" / kernel_id) as response:
             if response.status == 404:
                 return None
             elif response.status == 200:
                 return await response.json()
 
     async def delete_kernel(self, kernel_id):
-        async with self.session.delete(self.api_url / 'kernels' / kernel_id) as response:
+        async with self.session.delete(
+            self.api_url / "kernels" / kernel_id
+        ) as response:
             if response.status == 404:
-                raise ValueError(f'failed to delete kernel_id={kernel_id} does not exist')
+                raise ValueError(
+                    f"failed to delete kernel_id={kernel_id} does not exist"
+                )
             elif response.status == 204:
-                logger.info(f'deleted kernel={kernel_id} for jupyter')
+                logger.info(f"deleted kernel={kernel_id} for jupyter")
                 return True
 
 
 class JupyterKernelAPI:
     def __init__(self, kernel_url, api_token):
         self.api_url = kernel_url
-        self.api_token = api_token or os.environ['JUPYTERHUB_API_TOKEN']
+        self.api_token = api_token or os.environ["JUPYTERHUB_API_TOKEN"]
 
     async def __aenter__(self):
-        self.session = aiohttp.ClientSession(headers={
-            'Authorization': f'token {self.api_token}'
-        })
-        self.websocket = await self.session.ws_connect(self.api_url / 'channels')
+        self.session = aiohttp.ClientSession(
+            headers={"Authorization": f"token {self.api_token}"}
+        )
+        self.websocket = await self.session.ws_connect(self.api_url / "channels")
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -194,7 +220,7 @@ class JupyterKernelAPI:
                 "msg_id": msg_id,
                 "username": username,
                 "msg_type": "execute_request",
-                "version": "5.2"
+                "version": "5.2",
             },
             "metadata": {},
             "content": {
@@ -203,18 +229,19 @@ class JupyterKernelAPI:
                 "store_history": True,
                 "user_expressions": {},
                 "allow_stdin": True,
-                "stop_on_error": True
+                "stop_on_error": True,
             },
             "buffers": [],
             "parent_header": {},
-            "channel": "shell"
+            "channel": "shell",
         }
 
     async def send_code(self, username, code, wait=True, timeout=None):
         msg_id = str(uuid.uuid4())
-        start_time = time.time()
 
-        await self.websocket.send_json(self.request_execute_code(msg_id, username, code))
+        await self.websocket.send_json(
+            self.request_execute_code(msg_id, username, code)
+        )
 
         if not wait:
             return None
@@ -227,13 +254,13 @@ class JupyterKernelAPI:
 
             msg = msg_text.json()
 
-            if 'parent_header' in msg and msg['parent_header'].get('msg_id') == msg_id:
+            if "parent_header" in msg and msg["parent_header"].get("msg_id") == msg_id:
                 # These are responses to our request
-                if msg['channel'] == 'iopub':
-                    if msg['msg_type'] == 'execute_result':
-                        return msg['content']['data']['text/plain']
-                    elif msg['msg_type'] == 'stream':
-                        return msg['content']['text']
+                if msg["channel"] == "iopub":
+                    if msg["msg_type"] == "execute_result":
+                        return msg["content"]["data"]["text/plain"]
+                    elif msg["msg_type"] == "stream":
+                        return msg["content"]["text"]
                     # cell did not produce output
-                    elif msg['content'].get('execution_state') == 'idle':
-                        return ''
+                    elif msg["content"].get("execution_state") == "idle":
+                        return ""

@@ -6,16 +6,16 @@ def parse_notebook_cells(notebook_path):
         notebook_data = json.load(f)
 
     cells = []
-    for cell in notebook_data['cells']:
-        if cell['cell_type'] == 'code':
-            source = ''.join(cell['source'])
+    for cell in notebook_data["cells"]:
+        if cell["cell_type"] == "code":
+            source = "".join(cell["source"])
             outputs = []
-            for output in cell['outputs']:
-                if output['output_type'] == 'stream':
-                    outputs.append(''.join(output['text']))
-                elif output['output_type'] == 'execute_result':
-                    outputs.append(''.join(output['data']['text/plain']))
-            result = '\n'.join(outputs)
+            for output in cell["outputs"]:
+                if output["output_type"] == "stream":
+                    outputs.append("".join(output["text"]))
+                elif output["output_type"] == "execute_result":
+                    outputs.append("".join(output["data"]["text/plain"]))
+            result = "\n".join(outputs)
             cells.append((source, result))
 
     return cells
@@ -26,29 +26,31 @@ def render_notebook(cells):
         "cells": [],
         "nbformat": 4,
         "nbformat_minor": 4,
-        "metadata": { }
+        "metadata": {},
     }
 
     for i, (code, result) in enumerate(cells, start=1):
-        notebook_template['cells'].append({
-            'cell_type': 'code',
-            'execution_count': i,
-            'metadata': {},
-            'outputs': [{
-                'data': {
-                    'text/plain': result
-                },
+        notebook_template["cells"].append(
+            {
+                "cell_type": "code",
                 "execution_count": i,
                 "metadata": {},
-                "output_type": "execute_result"
-            }],
-            'source': code
-        })
+                "outputs": [
+                    {
+                        "data": {"text/plain": result},
+                        "execution_count": i,
+                        "metadata": {},
+                        "output_type": "execute_result",
+                    }
+                ],
+                "source": code,
+            }
+        )
 
     return notebook_template
 
 
-TEMPLATE_SCRIPT_HEADER = '''
+TEMPLATE_SCRIPT_HEADER = """
 import os
 import sys
 import logging
@@ -65,10 +67,12 @@ if OUTPUT_FORMAT == 'file':
     sys.stdout = open(STDOUT_FILENAME, 'w')
     sys.stderr = open(STDERR_FILENAME, 'w')
 
-'''
+"""
 
 
-def tangle_cells(cells, output_format='file', stdout_filename=None, stderr_filename=None):
+def tangle_cells(
+    cells, output_format="file", stdout_filename=None, stderr_filename=None
+):
     # TODO: eventually support writing output to notebook
 
     tangled_code = []
@@ -76,4 +80,4 @@ def tangle_cells(cells, output_format='file', stdout_filename=None, stderr_filen
         tangled_code.append('logger.info("beginning execution cell={i}")')
         tangled_code.append(code)
         tangled_code.append('logger.info("completed execution cell={i}")')
-    return TEMPLATE_SCRIPT_HEADER + '\n'.join(tangled_code)
+    return TEMPLATE_SCRIPT_HEADER + "\n".join(tangled_code)

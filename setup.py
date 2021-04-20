@@ -15,7 +15,7 @@ setup(
     url='https://github.com/Quansight/jhub-client',
     author='Christopher Ostrouchov',
     author_email='chris.ostrouchov@gmail.com',
-     classifiers=[
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
@@ -30,7 +30,12 @@ setup(
     packages=find_packages(where='.'),
     install_requires=['aiohttp', 'yarl'],
     extras_require={
-        'dev': ['pytest', 'pytest-asyncio'],
+        'dev': [
+            'pytest',
+            'pytest-asyncio',
+            'black==20.8b1',
+            'flake8==3.8.4',
+        ],
     },
     entry_points={
         'console_scripts': [
