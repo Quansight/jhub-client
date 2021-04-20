@@ -35,7 +35,7 @@ def create_token_subcommand(subparser):
         default="http://localhost:8000",
         help="url for running jupyterhub cluster",
     )
-    subparser.add_argumnet(
+    subparser.add_argument(
         "--name",
         default="jhub-client",
         type=str,
@@ -48,9 +48,9 @@ def handle_token(args):
     from jhub_client.api import JupyterHubAPI
 
     async def create_token(hub):
-        with JupyterHubAPI(hub, auth_type="basic") as hub:
+        async with JupyterHubAPI(hub, auth_type="basic") as hub:
             token = await hub.create_token(hub.username, token_name=args.name)
-            print(f"API Token: {token}")
+            print(token)
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(create_token(hub=args.hub))

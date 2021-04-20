@@ -30,7 +30,9 @@ class JupyterHubAPI:
         if self.auth_type == "token":
             self.session = await auth.token_authentication(self.api_token)
         elif self.auth_type == "basic":
-            self.session = await auth.basic_authentication(self.username, self.password)
+            self.session = await auth.basic_authentication(
+                self.hub_url, self.username, self.password
+            )
             self.api_token = await self.create_token(self.username)
         return self
 
@@ -102,7 +104,7 @@ class JupyterHubAPI:
         async with self.session.post(
             self.api_url / "users" / username / "tokens", json={"note": token_name}
         ) as response:
-            return (await response.json())["token"]
+            return response.json()["token"]
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}

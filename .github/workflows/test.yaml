@@ -10,6 +10,8 @@ on:
 
 env:
   JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
+  JUPYTERHUB_USERNAME: example-user
+  JUPYTERHUB_PASSWORD: test
 
 jobs:
   test-general:
