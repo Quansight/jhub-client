@@ -17,5 +17,6 @@ pkgs.mkShell {
 
   shellHook = ''
     export JUPYTERHUB_API_TOKEN=GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
+    export PYTHONPATH=$PWD:$PYTHONPATH
   '';
 }
