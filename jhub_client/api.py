@@ -3,7 +3,6 @@ import uuid
 import logging
 import time
 import asyncio
-import datetime
 
 import yarl
 import aiohttp
@@ -34,6 +33,9 @@ class JupyterHubAPI:
                 self.hub_url, self.username, self.password
             )
             self.api_token = await self.create_token(self.username)
+            await self.session.close()
+            logger.debug("upgrading basic authentication to token authentication")
+            self.session = await auth.token_authentication(self.api_token)
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -100,10 +102,11 @@ class JupyterHubAPI:
             logger.info(f"pending spawn polling for seconds={total_time:.0f} [s]")
 
     async def create_token(self, username, token_name=None):
-        token_name = token_name or f"jhub-client-{datetime.date.today()}"
+        token_name = token_name or "jhub-client"
         async with self.session.post(
             self.api_url / "users" / username / "tokens", json={"note": token_name}
         ) as response:
+            logger.info(f'created token for username={username}')
             return (await response.json())["token"]
 
     async def create_server(self, username, user_options=None):
