@@ -121,7 +121,7 @@ class JupyterHubAPI:
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
         async with self.session.post(
-            self.api_url / "users" / username / "server", data=user_options
+            self.api_url / "users" / username / "server", json=user_options
         ) as response:
             logger.info(
                 f"creating cluster username={username} user_options={user_options}"

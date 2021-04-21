@@ -117,7 +117,9 @@ async def execute_code(
                             logger.debug(
                                 f'kernel result cell={i} result=\n{textwrap.indent(kernel_result, "   | ")}'
                             )
-                            if validate and kernel_result != expected_result:
+                            if validate and (
+                                kernel_result.strip() != expected_result.strip()
+                            ):
                                 diff = "".join(
                                     difflib.unified_diff(kernel_result, expected_result)
                                 )
