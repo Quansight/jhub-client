@@ -14,10 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class JupyterHubAPI:
-    def __init__(self, hub_url, auth_type="token", **kwargs):
+    def __init__(self, hub_url, auth_type="token", verify_ssl=True, **kwargs):
         self.hub_url = yarl.URL(hub_url)
         self.api_url = self.hub_url / "hub/api"
         self.auth_type = auth_type
+        self.verify_ssl = verify_ssl
 
         if auth_type == "token":
             self.api_token = kwargs.get("api_token", os.environ["JUPYTERHUB_API_TOKEN"])
@@ -27,15 +28,19 @@ class JupyterHubAPI:
 
     async def __aenter__(self):
         if self.auth_type == "token":
-            self.session = await auth.token_authentication(self.api_token)
+            self.session = await auth.token_authentication(
+                self.api_token, verify_ssl=self.verify_ssl
+            )
         elif self.auth_type == "basic":
             self.session = await auth.basic_authentication(
-                self.hub_url, self.username, self.password
+                self.hub_url, self.username, self.password, verify_ssl=self.verify_ssl
             )
             self.api_token = await self.create_token(self.username)
             await self.session.close()
             logger.debug("upgrading basic authentication to token authentication")
-            self.session = await auth.token_authentication(self.api_token)
+            self.session = await auth.token_authentication(
+                self.api_token, verify_ssl=self.verify_ssl
+            )
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -89,7 +94,11 @@ class JupyterHubAPI:
         while True:
             user = await self.get_user(username)
             if user["server"] and user["pending"] is None:
-                return JupyterAPI(self.hub_url / "user" / username, self.api_token)
+                return JupyterAPI(
+                    self.hub_url / "user" / username,
+                    self.api_token,
+                    verify_ssl=self.verify_ssl,
+                )
 
             await asyncio.sleep(5)
             total_time = time.time() - start_time
@@ -114,6 +123,9 @@ class JupyterHubAPI:
         async with self.session.post(
             self.api_url / "users" / username / "server", data=user_options
         ) as response:
+            logger.info(
+                f"creating cluster username={username} user_options={user_options}"
+            )
             if response.status == 400:
                 raise ValueError(f"server for username={username} is already running")
             elif response.status == 201:
@@ -146,13 +158,15 @@ class JupyterHubAPI:
 
 
 class JupyterAPI:
-    def __init__(self, notebook_url, api_token):
+    def __init__(self, notebook_url, api_token, verify_ssl=True):
         self.api_url = yarl.URL(notebook_url) / "api"
         self.api_token = api_token or os.environ["JUPYTERHUB_API_TOKEN"]
+        self.verify_ssl = verify_ssl
 
     async def __aenter__(self):
         self.session = aiohttp.ClientSession(
-            headers={"Authorization": f"token {self.api_token}"}
+            headers={"Authorization": f"token {self.api_token}"},
+            connector=aiohttp.TCPConnector(ssl=None if self.verify_ssl else False),
         )
         return self
 
@@ -193,7 +207,9 @@ class JupyterAPI:
 
         kernel_id = (await self.create_kernel(kernel_spec=kernel_spec))["id"]
         return kernel_id, JupyterKernelAPI(
-            self.api_url / "kernels" / kernel_id, self.api_token
+            self.api_url / "kernels" / kernel_id,
+            self.api_token,
+            verify_ssl=self.verify_ssl,
         )
 
     async def get_kernel(self, kernel_id):
@@ -217,13 +233,15 @@ class JupyterAPI:
 
 
 class JupyterKernelAPI:
-    def __init__(self, kernel_url, api_token):
+    def __init__(self, kernel_url, api_token, verify_ssl=True):
         self.api_url = kernel_url
         self.api_token = api_token or os.environ["JUPYTERHUB_API_TOKEN"]
+        self.verify_ssl = verify_ssl
 
     async def __aenter__(self):
         self.session = aiohttp.ClientSession(
-            headers={"Authorization": f"token {self.api_token}"}
+            headers={"Authorization": f"token {self.api_token}"},
+            connector=aiohttp.TCPConnector(ssl=None if self.verify_ssl else False),
         )
         self.websocket = await self.session.ws_connect(self.api_url / "channels")
         return self

@@ -41,19 +41,25 @@ def create_token_subcommand(subparser):
         type=str,
         help="name to give to jupyterhub api token",
     )
+    subparser.add_argument(
+        "--no-verify-ssl",
+        action="store_true",
+        help="disable ssl checking",
+    )
     subparser.set_defaults(func=handle_token)
 
 
 def handle_token(args):
     from jhub_client.api import JupyterHubAPI
 
-    async def create_token(hub):
-        async with JupyterHubAPI(hub, auth_type="basic") as hub:
-            token = await hub.create_token(hub.username, token_name=args.name)
-            print(token, end="")
+    async def create_token(hub_url):
+        async with JupyterHubAPI(
+            hub_url, auth_type="basic", verify_ssl=not args.no_verify_ssl
+        ) as hub:
+            print(hub.api_token, end="")
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(create_token(hub=args.hub))
+    loop.run_until_complete(create_token(hub_url=args.hub))
 
 
 def create_run_subcommand(subparser):
@@ -115,6 +121,11 @@ def create_run_subcommand(subparser):
         type=str,
         help="output filename for results of running notebook",
     )
+    subparser.add_argument(
+        "--no-verify-ssl",
+        action="store_true",
+        help="disable ssl checking",
+    )
     subparser.set_defaults(func=handle_run)
 
 
@@ -143,6 +154,7 @@ def handle_run(args):
         "user_options": user_options,
         "kernel_spec": args.kernel_spec,
         "auth_type": args.auth_type,
+        "verify_ssl": not args.no_verify_ssl,
     }
 
     if args.daemonize and args.temporary_user:
