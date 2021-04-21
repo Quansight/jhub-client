@@ -104,7 +104,7 @@ class JupyterHubAPI:
         async with self.session.post(
             self.api_url / "users" / username / "tokens", json={"note": token_name}
         ) as response:
-            return response.json()["token"]
+            return (await response.json())["token"]
 
     async def create_server(self, username, user_options=None):
         user_options = user_options or {}
@@ -124,7 +124,7 @@ class JupyterHubAPI:
         logger.info(f"deleted server for username={username}")
 
     async def info(self):
-        async with self.session.post(self.api_url / "info") as response:
+        async with self.session.get(self.api_url / "info") as response:
             return await response.json()
 
     async def list_users(self):
