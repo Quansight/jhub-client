@@ -11,6 +11,7 @@ def cli(args=None):
     parser = argparse.ArgumentParser(description="jupyterhub client cli")
     subparser = parser.add_subparsers(help="jupyterhub client cli")
     create_run_subcommand(subparser)
+    create_token_subcommand(subparser)
     parser.set_defaults(func=None)
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="turn on jhub_client debugging"
@@ -26,16 +27,52 @@ def cli(args=None):
     args.func(args)
 
 
+def create_token_subcommand(subparser):
+    subparser = subparser.add_parser("token")
+    subparser.add_argument(
+        "--hub",
+        type=str,
+        default="http://localhost:8000",
+        help="url for running jupyterhub cluster",
+    )
+    subparser.add_argument(
+        "--name",
+        default="jhub-client",
+        type=str,
+        help="name to give to jupyterhub api token",
+    )
+    subparser.set_defaults(func=handle_token)
+
+
+def handle_token(args):
+    from jhub_client.api import JupyterHubAPI
+
+    async def create_token(hub):
+        async with JupyterHubAPI(hub, auth_type="basic") as hub:
+            token = await hub.create_token(hub.username, token_name=args.name)
+            print(token, end="")
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(create_token(hub=args.hub))
+
+
 def create_run_subcommand(subparser):
     subparser = subparser.add_parser("run")
     subparser.add_argument(
         "-n", "--notebook", type=str, help="notebook to run", required=True
     )
     subparser.add_argument(
+        "--auth-type",
+        type=str,
+        default="token",
+        choices=["token", "basic"],
+        help="jupyterhub authentication type to use with default of token based",
+    )
+    subparser.add_argument(
         "--hub",
         type=str,
         default="http://localhost:8000",
-        help="url for running jupyterhub cluster",
+        help="url for running jupyterhub cluster with default of 'http://localhost:8000'",
     )
     subparser.add_argument(
         "-u", "--username", type=str, help="username to run notebook as"
@@ -105,6 +142,7 @@ def handle_run(args):
         "stop_server": args.stop_server,
         "user_options": user_options,
         "kernel_spec": args.kernel_spec,
+        "auth_type": args.auth_type,
     }
 
     if args.daemonize and args.temporary_user:

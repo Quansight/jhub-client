@@ -10,6 +10,8 @@ on:
 
 env:
   JUPYTERHUB_API_TOKEN: GiJ96ujfLpPsq7oatW1IJuER01FbZsgyCM0xH6oMZXDAV6zUZsFy3xQBZakSBo6P
+  JUPYTERHUB_USERNAME: example-user
+  JUPYTERHUB_PASSWORD: test
 
 jobs:
   test-general:
@@ -44,6 +46,9 @@ jobs:
       - name: Run tests
         run: |
           pytest -v
-      - name: Run command line
+      - name: Run command line "run notebook"
         run: |
           jhubctl --verbose run --temporary-user -n tests/assets/notebook/simple.ipynb
+      - name: Run command line "create token"
+        run: |
+          jhubctl --verbose token --name "example"
