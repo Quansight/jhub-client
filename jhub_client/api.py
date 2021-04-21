@@ -106,7 +106,7 @@ class JupyterHubAPI:
         async with self.session.post(
             self.api_url / "users" / username / "tokens", json={"note": token_name}
         ) as response:
-            logger.info(f'created token for username={username}')
+            logger.info(f"created token for username={username}")
             return (await response.json())["token"]
 
     async def create_server(self, username, user_options=None):

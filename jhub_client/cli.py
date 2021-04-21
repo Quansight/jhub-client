@@ -50,7 +50,7 @@ def handle_token(args):
     async def create_token(hub):
         async with JupyterHubAPI(hub, auth_type="basic") as hub:
             token = await hub.create_token(hub.username, token_name=args.name)
-            print(token, end='')
+            print(token, end="")
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(create_token(hub=args.hub))
