@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='jupyterhub, jupyter, benchmark',
-    packages=find_packages(where='.'),
+    packages=find_packages(include=["jhub_client", "jhub_client.*"]),
     install_requires=['aiohttp', 'yarl'],
     extras_require={
         'dev': [
