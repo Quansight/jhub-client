@@ -62,10 +62,17 @@ def create_run_subcommand(subparser):
         "-n", "--notebook", type=str, help="notebook to run", required=True
     )
     subparser.add_argument(
+        "--auth-type",
+        type=str,
+        default="token",
+        choices=["token", "basic"],
+        help="jupyterhub authentication type to use with default of token based",
+    )
+    subparser.add_argument(
         "--hub",
         type=str,
         default="http://localhost:8000",
-        help="url for running jupyterhub cluster",
+        help="url for running jupyterhub cluster with default of 'http://localhost:8000'",
     )
     subparser.add_argument(
         "-u", "--username", type=str, help="username to run notebook as"
@@ -135,6 +142,7 @@ def handle_run(args):
         "stop_server": args.stop_server,
         "user_options": user_options,
         "kernel_spec": args.kernel_spec,
+        "auth_type": args.auth_type,
     }
 
     if args.daemonize and args.temporary_user:

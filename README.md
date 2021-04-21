@@ -23,21 +23,46 @@ Set the api token used for `jhub-client`.
 export JUPYTERHUB_API_TOKEN=<api-token>
 ```
 
+Optionally basic authentication can be used instead of token based
+(not recommended but needed in some use cases). In which case
+`username` and `password` are required.
+
+```shell
+export JUPYTERHUB_USERNAME=<username>
+export JUPYTERHUB_PASSWORD=<password>
+```
+
+## Token
+
+```shell
+$ jhubctl token --help
+usage: __main__.py token [-h] [--hub HUB] [--name NAME]
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --hub HUB    url for running jupyterhub cluster
+  --name NAME  name to give to jupyterhub api token
+```
+
+A simple command line utility can be used to create a token. This only
+supports basic authentication (`username` and `password`) login to the
+jupyterhub cluster.
+
 ## Run
 
 ```shell
-$ jhubctl --help
-usage: __main__.py run [-h] -n NOTEBOOK [--hub HUB] [-u USERNAME]
-                       [--user-options USER_OPTIONS] [--temporary-user] [-d]
-                       [--stop-server] [--validate]
-                       [--kernel-spec KERNEL_SPEC]
-                       [--output-filename OUTPUT_FILENAME]
+$ jhubctl run --help
+usage: __main__.py run [-h] -n NOTEBOOK [--auth-type {token,basic}] [--hub HUB] [-u USERNAME]
+                       [--user-options USER_OPTIONS] [--temporary-user] [-d] [--stop-server] [--validate]
+                       [--kernel-spec KERNEL_SPEC] [--output-filename OUTPUT_FILENAME]
 
 optional arguments:
   -h, --help            show this help message and exit
   -n NOTEBOOK, --notebook NOTEBOOK
                         notebook to run
-  --hub HUB             url for running jupyterhub cluster
+  --auth-type {token,basic}
+                        jupyterhub authentication type to use with default of token based
+  --hub HUB             url for running jupyterhub cluster with default of 'http://localhost:8000'
   -u USERNAME, --username USERNAME
                         username to run notebook as
   --user-options USER_OPTIONS
@@ -47,8 +72,7 @@ optional arguments:
   --stop-server         stop server after completion of notebook
   --validate            validate notebook output matches
   --kernel-spec KERNEL_SPEC
-                        kernel spec to launch is not specified will use
-                        default
+                        kernel spec to launch is not specified will use default
   --output-filename OUTPUT_FILENAME
                         output filename for results of running notebook
 ```
