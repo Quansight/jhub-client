@@ -112,7 +112,7 @@ async def execute_code(
                             )
                         else:
                             logger.debug(
-                                f'kernel execucting cell={i} code=\n{textwrap.indent(code, "   >>> ")}'
+                                f'kernel executing cell={i} code=\n{textwrap.indent(code, "   >>> ")}'
                             )
                             logger.debug(
                                 f'kernel result cell={i} result=\n{textwrap.indent(kernel_result, "   | ")}'
