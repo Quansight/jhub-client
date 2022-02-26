@@ -25,6 +25,9 @@ class JupyterHubAPI:
         elif auth_type == "basic":
             self.username = kwargs.get("username", os.environ["JUPYTERHUB_USERNAME"])
             self.password = kwargs.get("password", os.environ["JUPYTERHUB_PASSWORD"])
+        elif auth_type == "keycloak":
+            self.username = kwargs.get("username", os.environ["JUPYTERHUB_USERNAME"])
+            self.password = kwargs.get("password", os.environ["JUPYTERHUB_PASSWORD"])
 
     async def __aenter__(self):
         if self.auth_type == "token":
@@ -38,6 +41,16 @@ class JupyterHubAPI:
             self.api_token = await self.create_token(self.username)
             await self.session.close()
             logger.debug("upgrading basic authentication to token authentication")
+            self.session = await auth.token_authentication(
+                self.api_token, verify_ssl=self.verify_ssl
+            )
+        elif self.auth_type == "keycloak":
+            self.session = await auth.keycloak_authentication(
+                self.hub_url, self.username, self.password, verify_ssl=self.verify_ssl
+            )
+            self.api_token = await self.create_token(self.username)
+            await self.session.close()
+            logger.debug("upgrading keycloak authentication to token authentication")
             self.session = await auth.token_authentication(
                 self.api_token, verify_ssl=self.verify_ssl
             )
