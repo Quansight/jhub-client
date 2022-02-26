@@ -71,7 +71,7 @@ def create_run_subcommand(subparser):
         "--auth-type",
         type=str,
         default="token",
-        choices=["token", "basic"],
+        choices=["token", "basic", "keycloak"],
         help="jupyterhub authentication type to use with default of token based",
     )
     subparser.add_argument(

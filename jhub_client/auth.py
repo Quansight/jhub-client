@@ -1,3 +1,5 @@
+import re
+
 import aiohttp
 import yarl
 
@@ -23,4 +25,26 @@ async def basic_authentication(hub_url, username, password, verify_ssl=True):
         },
     )
 
+    return session
+
+
+async def keycloak_authentication(hub_url, username, password, verify_ssl=True):
+    session = aiohttp.ClientSession(
+        headers={"Referer": str(yarl.URL(hub_url) / "hub" / "api")},
+        connector=aiohttp.TCPConnector(ssl=None if verify_ssl else False),
+    )
+
+    response = await session.get(yarl.URL(hub_url) / "hub" / "oauth_login")
+    content = await response.content.read()
+    auth_url = re.search('action="([^"]+)"', content.decode("utf8")).group(1)
+
+    response = await session.post(
+        auth_url.replace("&amp;", "&"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={
+            "username": username,
+            "password": password,
+            "credentialId": "",
+        },
+    )
     return session
