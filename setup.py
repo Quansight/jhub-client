@@ -33,8 +33,8 @@ setup(
         'dev': [
             'pytest',
             'pytest-asyncio',
-            'black==20.8b1',
-            'flake8==3.8.4',
+            'black==22.1.0',
+            'flake8==4.0.1',
         ],
     },
     entry_points={
