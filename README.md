@@ -191,5 +191,5 @@ To guarantee a welcoming and friendly community, we require contributors to foll
 
 # License
 
-x[jhub-client](https://github.com/Quansight/jhub-client/blob/main/LICENSE)
+[jhub-client](https://github.com/Quansight/jhub-client/blob/main/LICENSE)
 is BSD-3 Licensed
