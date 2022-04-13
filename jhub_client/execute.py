@@ -138,10 +138,10 @@ async def execute_code(
                 if not daemonized:
                     await jupyter.delete_kernel(kernel_id)
             if not daemonized and stop_server:
-                await hub.ensure_server_deleted(username)
+                await hub.ensure_server_deleted(username, timeout=server_deletion_timeout)
         finally:
             if delete_user and not daemonized:
-                await hub.delete_user(username, timeout=server_deletion_timeout)
+                await hub.delete_user(username)
 
         return result_cells
 
