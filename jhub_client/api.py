@@ -126,7 +126,7 @@ class JupyterHubAPI:
     async def ensure_server_deleted(self, username, timeout):
         user = await self.get_user(username)
         if user is None:
-            return # user doesn't exist so server can't exist
+            return  # user doesn't exist so server can't exist
 
         start_time = time.time()
         while True:
@@ -169,7 +169,9 @@ class JupyterHubAPI:
                 return True
 
     async def delete_server(self, username):
-        response = await self.session.delete(self.api_url / "users" / username / "server")
+        response = await self.session.delete(
+            self.api_url / "users" / username / "server"
+        )
         logger.info(f"deleted server for username={username}")
         return response.status
 
