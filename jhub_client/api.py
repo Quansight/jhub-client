@@ -123,6 +123,27 @@ class JupyterHubAPI:
 
             logger.info(f"pending spawn polling for seconds={total_time:.0f} [s]")
 
+    async def ensure_server_deleted(self, username, timeout):
+        user = await self.get_user(username)
+        if user is None:
+            return  # user doesn't exist so server can't exist
+
+        start_time = time.time()
+        while True:
+            server_status = await self.delete_server(username)
+            if server_status == 204:
+                return
+
+            await asyncio.sleep(5)
+            total_time = time.time() - start_time
+            if total_time > timeout:
+                logger.error(f"jupyterhub server deletion timeout={timeout:.0f} [s]")
+                raise TimeoutError(
+                    f"jupyterhub server deletion timeout={timeout:.0f} [s]"
+                )
+
+            logger.info(f"pending deletion polling for seconds={total_time:.0f} [s]")
+
     async def create_token(self, username, token_name=None):
         token_name = token_name or "jhub-client"
         async with self.session.post(
@@ -148,8 +169,11 @@ class JupyterHubAPI:
                 return True
 
     async def delete_server(self, username):
-        await self.session.delete(self.api_url / "users" / username / "server")
+        response = await self.session.delete(
+            self.api_url / "users" / username / "server"
+        )
         logger.info(f"deleted server for username={username}")
+        return response.status
 
     async def info(self):
         async with self.session.get(self.api_url / "info") as response:
