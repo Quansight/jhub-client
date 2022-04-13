@@ -130,7 +130,7 @@ class JupyterHubAPI:
 
         start_time = time.time()
         while True:
-            server_status = self.delete_server(username)
+            server_status = await self.delete_server(username)
             if server_status == 204:
                 return
 
