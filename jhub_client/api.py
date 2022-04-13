@@ -142,7 +142,7 @@ class JupyterHubAPI:
                     f"jupyterhub server deletion timeout={timeout:.0f} [s]"
                 )
 
-            logger.info(f"pending spawn polling for seconds={total_time:.0f} [s]")
+            logger.info(f"pending deletion polling for seconds={total_time:.0f} [s]")
 
     async def create_token(self, username, token_name=None):
         token_name = token_name or "jhub-client"
