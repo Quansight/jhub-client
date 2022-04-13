@@ -12,9 +12,14 @@ async def test_n_users():
 
     def generate_user_workflow():
         while True:
-            yield (f'user-{uuid.uuid4()}', parse_notebook_cells('tests/assets/notebook/simple.ipynb'))
+            yield (
+                f"user-{uuid.uuid4()}",
+                parse_notebook_cells("tests/assets/notebook/simple.ipynb"),
+            )
 
     await simulate_users(
-        hub_url='http://localhost:8000',
+        hub_url="http://localhost:8000",
         num_users=NUM_USERS,
-        user_generator=generate_user_workflow(), workflow='concurrent')
+        user_generator=generate_user_workflow(),
+        workflow="concurrent",
+    )
