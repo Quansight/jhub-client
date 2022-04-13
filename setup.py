@@ -8,7 +8,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='jhub-client',
-    version='0.1.5',
+    version='0.1.6',
     description='Library and Client for managing, benchmarking, and interacting with jupyterhub',
     long_description=long_description,
     long_description_content_type='text/markdown',

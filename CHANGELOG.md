@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## 0.1.6
+
+### Added
+
+ - Returning status from delete_server and new method ensure_server_deleted #15
+ - Added support for nix flakes #16
+
 ## 0.1.5
 
 ### Added
