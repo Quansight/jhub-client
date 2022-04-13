@@ -33,7 +33,7 @@ setup(
         'dev': [
             'pytest',
             'pytest-asyncio',
-            'black==22.1.0',
+            'black==22.3.0',
             'flake8==4.0.1',
         ],
     },
