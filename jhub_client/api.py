@@ -24,10 +24,12 @@ class JupyterHubAPI:
             # Only look for the env var if api_token isn't explicitly passed.
             # Otherwise, we always try to read the env var even if it isn't necessary,
             # and this can crash if the env var isn't set.
-            self.api_token = kwargs.get("api_token") or os.environ["JUPYTERHUB_API_TOKEN"]
+            self.api_token = (
+                kwargs.get("api_token") or os.environ["JUPYTERHUB_API_TOKEN"]
+            )
         elif auth_type == "basic" or auth_type == "keycloak":
-            self.username = kwargs.get("username") or os.environ['JUPYTERHUB_USERNAME']
-            self.password = kwargs.get("password") or os.environ['JUPYTERHUB_PASSWORD']
+            self.username = kwargs.get("username") or os.environ["JUPYTERHUB_USERNAME"]
+            self.password = kwargs.get("password") or os.environ["JUPYTERHUB_PASSWORD"]
 
     async def __aenter__(self):
         if self.auth_type == "token":
