@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## 0.1.7
+
+### Fixed
+
+ - Fix crash when token env var isn't set #19 
+
 ## 0.1.6
 
 ### Added
